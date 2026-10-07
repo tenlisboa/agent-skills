@@ -112,6 +112,8 @@ Repeat this loop for each change:
 
 Each commit must build and pass. Then you can bisect, revert or stop at any commit.
 
+Keep the order of arithmetic operations when you move code. With floating-point numbers, a different order can change the last digit of a result.
+
 ## Step 5: One pattern per commit or pull request
 
 - Put the classic refactorings that prepare the pattern in earlier commits.

@@ -117,7 +117,8 @@ If you run without a user, follow these steps:
 
 1. Write the map to `REFACTOR_MAP.md`. If commits are allowed, commit it alone.
 2. Apply only recommendations at rungs 1 to 4. A full pattern (rung 5) waits for the confirmation of the user.
-3. List the open questions at the end of your report.
+3. In `REFACTOR_MAP.md`, replace the reply line with the options that you applied.
+4. List the open questions at the end of your report.
 
 At architecture scale, a row is a seam between modules or services, not a function. Take the options from the "At architecture scale" section of each pattern file. Examples: an anti-corruption layer (Adapter), domain events with an outbox (Observer), a module facade for a strangler migration (Facade).
 
@@ -176,7 +177,7 @@ Cross-cutting references:
 |---|---|
 | Edit code before the user saw the options (Map mode, or a counter-signal in Targeted mode) | Produce the Refactor Map and end the turn. |
 | One class for each variant in Python or TypeScript, with no other option shown | Offer a function or a dict of functions as option B. |
-| A pattern on data that only varies by value (rates, prices, labels) | Use a lookup table. List it under "Not touching". |
+| A pattern on data that only varies by value (rates, prices, labels) | Offer a lookup table as option B, not a pattern. If the change pressure does not reach it, list it under "Not touching". |
 | A hidden global (Singleton, module state) left out with no comment | State its test cost in the map. Offer explicit injection as an option. |
 | A large line increase done before the user weighed it | Put the approximate line delta in the "Cost" slot of each option. |
 | A pattern name chosen first, then a place to use it | Start from the signal and the change pressure. Patterns come last. |

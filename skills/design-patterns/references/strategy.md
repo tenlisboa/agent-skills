@@ -55,7 +55,7 @@ classDiagram
 
 1. Write characterization tests for each branch of the conditional. Cover each mode at least once.
 2. Use Extract Method on each branch body. Give every extracted method the same signature. Use Introduce Parameter Object if the inputs differ a little.
-3. Stop point: the conditional now only dispatches to small named functions. This is often enough. Stop here if there are fewer than four variants.
+3. Stop point: the conditional now only dispatches to small named functions. This is often enough. Stop here if there are three variants or fewer and no growth is planned.
 4. Declare the strategy type. In TypeScript, a function type is the default: `type Backoff = (attempt: number) => number`.
 5. Move each extracted method into a map keyed by the mode (`Record<Mode, Backoff>`). Replace the conditional with one lookup. This is Replace Conditional with Polymorphism in its lightest form.
 6. If a variant needs its own state or dependencies, turn only that entry into a class or a closure factory. Keep the others as plain functions.
