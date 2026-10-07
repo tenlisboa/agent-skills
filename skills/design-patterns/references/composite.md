@@ -10,7 +10,7 @@ Give single items and groups of items one shared interface, so clients can work 
 
 ## Signals in code
 
-- Recursive functions that check node kind before they recurse. Search: `grep -rnE "(instanceof|\.type ===?) ?['\"]?(Group|Folder|Section|Node)"`.
+- Recursive functions that check node kind before they recurse. Search: `grep -rnE "(instanceof|\.type ===?) ?['\"]?(Group|Folder|Section|Node)" <src-dir>`.
 - The same tree walk appears in several places, each with a different operation inside (total, render, validate).
 - Code that handles "one item" and "list of items" in two branches, for example `Array.isArray(x) ? x.map(...) : f(x)`.
 - Nested JSON or config with groups inside groups: menus, permission groups, rule sets, bill of materials, UI layouts.
@@ -94,7 +94,7 @@ The architecture form is worth it when the hierarchy has real depth and users ed
 
 **Costs:**
 - The shared interface can become too general.
-- You cannot easily restrict which child kinds a group accepts at compile time.
+- You cannot restrict which child kinds a group accepts at compile time.
 - Deep trees cost stack depth and can hide slow fan-out, for example N database calls.
 
 ## Neighbors
@@ -103,7 +103,7 @@ The architecture form is worth it when the hierarchy has real depth and users ed
 - **Visitor**: Visitor moves operations out of the nodes. Ask: do new operations arrive more often than new node kinds?
 - **Iterator**: Iterator gives a flat traversal of the tree. Ask: does the client need every node, or one combined answer?
 - **Chain of Responsibility**: a leaf can pass a request up through its parents. Ask: does the request flow up the tree or down?
-- **Flyweight**: shared immutable leaves can save memory in very large trees. Ask: do many leaves hold identical state?
+- **Flyweight**: shared immutable leaves can save memory in large trees. Ask: do many leaves hold identical state?
 
 Often combined with: Builder (build trees), Visitor (add operations), Iterator (traverse), Decorator (wrap one node).
 

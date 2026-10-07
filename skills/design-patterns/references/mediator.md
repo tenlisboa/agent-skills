@@ -10,7 +10,7 @@ Stop a group of peer objects from calling each other directly, and route their i
 
 ## Signals in code
 
-- Several classes hold references to each other in a mesh. A change in one forces edits in three others. Search for mutual imports, for example with `madge --circular` or `grep -rn "import .* from './"` per module.
+- Several classes hold references to each other in a mesh. A change in one forces edits in three others. Search for mutual imports, for example with `madge --circular` or `grep -rn "import .* from './" <src-dir>` per module.
 - A component calls methods on siblings after an event: "when the cart changes, update the shipping widget, the promo banner and the total".
 - You cannot reuse a component in a second screen or workflow because it calls specific neighbors.
 - Subclasses exist only to change which siblings a component talks to.

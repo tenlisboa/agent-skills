@@ -10,8 +10,8 @@ Give clients one small entry point to a subsystem with many parts, call orders a
 
 ## Signals in code
 
-- Several controllers or jobs repeat the same sequence of calls to the same group of services. Search for the sequence: `grep -rn -A3 "createCustomer(" src/ | grep "createSubscription("`.
-- Business code imports many classes from one library or module to do one task. Search: `grep -rnE "^import \{[^}]{120,}\} from" src/`.
+- Several controllers or jobs repeat the same sequence of calls to the same group of services. Search for the sequence: `grep -rn -A3 "createCustomer(" <src-dir> | grep "createSubscription("`.
+- Business code imports many classes from one library or module to do one task. Search: `grep -rnE "^import \{[^}]{120,}\} from" <src-dir>`.
 - Setup code with an order that matters, such as "init the client, then auth, then pick the region", copied into many files.
 - A bug fix that needed edits in every place that runs the same workflow.
 - New team members ask "which calls do I make, and in which order" for a common task.

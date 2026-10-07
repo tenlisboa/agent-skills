@@ -10,10 +10,10 @@ Split one class hierarchy that varies along two independent axes into two hierar
 
 ## Signals in code
 
-- Class names that combine two words from two lists, for example `PdfInvoiceExporter`, `HtmlInvoiceExporter`, `PdfStatementExporter`. Search: `grep -rhoE "class (Pdf|Html|Csv)[A-Z][a-zA-Z]+" src/ | sort`.
+- Class names that combine two words from two lists, for example `PdfInvoiceExporter`, `HtmlInvoiceExporter`, `PdfStatementExporter`. Search: `grep -rhoE "class (Pdf|Html|Csv)[A-Z][a-zA-Z]+" <src-dir> | sort`.
 - A new value on one axis needs one new subclass for every value on the other axis.
 - Subclasses that duplicate the same low-level code and differ only in the high-level steps, or the reverse.
-- A `switch` on a platform, driver or backend inside methods that also contain business rules. Search: `grep -rnE "switch ?\((this\.)?(driver|backend|platform|format)"`.
+- A `switch` on a platform, driver or backend inside methods that also contain business rules. Search: `grep -rnE "switch ?\((this\.)?(driver|backend|platform|format)" <src-dir>`.
 - Feature flags or config values that pick a backend in many places instead of in one place.
 - A refactor ticket that says "support a second database" or "add a second renderer" and estimates many files.
 

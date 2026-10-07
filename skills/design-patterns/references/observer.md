@@ -12,8 +12,8 @@ Let one object announce that something happened, and let any number of other obj
 
 - A core method ends with a list of unrelated follow-up calls (`sendEmail`, `updateSearchIndex`, `trackAnalytics`, `invalidateCache`). Each new feature adds one more line.
 - A module imports many other modules only to notify them. The dependency graph points from the core to the edges.
-- Polling loops that check whether a value changed. Search: `grep -nE "setInterval|while \(true\)|sleep\(" -r src`.
-- Callback arrays built by hand (`this.handlers.push(fn)`). Search: `grep -nE "(listeners|handlers|callbacks|subscribers)\.push" -r src`.
+- Polling loops that check whether a value changed. Search: `grep -rnE "setInterval|while \(true\)|sleep\(" -r <src-dir> <src-dir>`.
+- Callback arrays built by hand (`this.handlers.push(fn)`). Search: `grep -rnE "(listeners|handlers|callbacks|subscribers)\.push" -r <src-dir> <src-dir>`.
 - Circular imports between a domain module and the modules that react to it.
 - Plugins or third parties need to run code when the core changes, and the core cannot know them.
 

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "groupings": [
+    {
+      "title": "Refactoring",
+      "description": "Skills that refactor code and restructure architectures with the user in the loop.",
+      "skills": ["design-patterns"]
+    }
+  ]
+}

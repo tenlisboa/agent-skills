@@ -10,11 +10,11 @@ Put a thin translator between your code and a component whose interface does not
 
 ## Signals in code
 
-- Calls to a vendor SDK appear in many business files. Search: `grep -rn "from 'stripe'\|require('aws-sdk')" src/ | wc -l`.
+- Calls to a vendor SDK appear in many business files. Search: `grep -rn "from 'stripe'\|require('aws-sdk')" <src-dir> | wc -l`.
 - The same field mapping repeats near each call site, for example `amount_cents / 100` or `snake_case` to `camelCase` conversion.
 - Vendor types leak into domain signatures, for example a domain function that takes `Stripe.Charge` or returns an ORM row.
-- Tests mock a third-party library module directly because no seam of your own exists. Search: `grep -rn "jest.mock('" test/`.
-- Two providers do the same job and the code branches on the provider name. Search: `grep -rnE "provider ?(===|==) ?['\"]"`.
+- Tests mock a third-party library module directly because no seam of your own exists. Search: `grep -rn "jest.mock('" <test-dir>`.
+- Two providers do the same job and the code branches on the provider name. Search: `grep -rnE "provider ?(===|==) ?['\"]" <src-dir>`.
 - Error handling catches vendor-specific exception classes in business code.
 - A planned vendor migration has an estimate that scales with the number of call sites.
 
@@ -54,7 +54,7 @@ classDiagram
 
 ## Refactoring path
 
-1. Find all call sites of the foreign API. Record the operations that the business code really uses.
+1. Find all call sites of the foreign API. Record the operations that the business code uses.
 2. Write characterization tests around one call site. Capture current inputs, outputs and errors.
 3. Extract Interface: declare the target interface in the domain module. Use domain names and domain types only.
 4. Create the adapter class. Move the first call and its mapping into it (Move Method).

@@ -10,11 +10,11 @@ Add a responsibility to an object by wrapping it in another object with the same
 
 ## Signals in code
 
-- The same cross-cutting lines repeat at the start and end of many methods: timing, logging, retry, metrics. Search: `grep -rnE "performance\.now\(\)|console\.time|startSpan\(" src/ | wc -l`.
+- The same cross-cutting lines repeat at the start and end of many methods: timing, logging, retry, metrics. Search: `grep -rnE "performance\.now\(\)|console\.time|startSpan\(" <src-dir> | wc -l`.
 - Subclasses named after combined features, for example `CachedRetryingClient` or `LoggedEncryptedStore`.
 - Boolean flags in a constructor that turn optional behaviors on and off, for example `new Client({ retry: true, log: true, cache: false })`, with `if (this.opts.retry)` inside methods.
 - A class marked `final` or `sealed`, or a vendor class, that needs extra behavior.
-- Copy-pasted `try/catch` blocks with backoff loops around different calls. Search: `grep -rn "for (let attempt" src/`.
+- Copy-pasted `try/catch` blocks with backoff loops around different calls. Search: `grep -rn "for (let attempt" <src-dir>`.
 
 ## Do not use when
 

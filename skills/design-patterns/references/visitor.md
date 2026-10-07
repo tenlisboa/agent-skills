@@ -12,10 +12,10 @@ Add new operations over a fixed set of node types without editing those types ea
 
 - A tree or graph of different node classes (AST, rule tree, document model, UI schema) with many unrelated operations on it.
 - Node classes collect methods for printing, validating, evaluating, serializing and pricing. Each method has one implementation per node class.
-- `instanceof` or type-tag chains that walk a structure. Search: `grep -nE "instanceof (\w+Node|\w+Expr)" -r src`.
+- `instanceof` or type-tag chains that walk a structure. Search: `grep -rnE "instanceof (\w+Node|\w+Expr)" -r <src-dir> <src-dir>`.
 - A new operation forces edits in every node class file.
 - The same recursive walk is copied in several functions. Only the per-node action differs.
-- Existing `accept(visitor)` methods. Check if every visitor really needs every node type.
+- Existing `accept(visitor)` methods. Check if every visitor needs every node type.
 
 ## Do not use when
 

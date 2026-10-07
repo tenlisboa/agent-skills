@@ -10,10 +10,10 @@ Put each step that can act on a request into its own handler, and connect the ha
 
 ## Signals in code
 
-- One long function runs a sequence of guard checks with early returns: auth, rate limit, schema validation, cache lookup, then the real work. Search: `grep -nE "if \(!.*\) (return|throw)" -A1` in request handlers.
-- Two or more entry points copy the same subset of checks in a different order. Search for repeated calls such as `grep -rn "checkRateLimit\|verifyToken\|validateSchema"`.
+- One long function runs a sequence of guard checks with early returns: auth, rate limit, schema validation, cache lookup, then the real work. Search: `grep -rnE "if \(!.*\) (return|throw)" -A1 <src-dir>` in request handlers.
+- Two or more entry points copy the same subset of checks in a different order. Search for repeated calls such as `grep -rn "checkRateLimit\|verifyToken\|validateSchema" <src-dir>`.
 - A change to one check breaks another check because they share local variables in the same function.
-- A dispatcher tries a list of parsers, resolvers or pricing rules until one returns a value. Search: `grep -nE "for .* of (handlers|resolvers|rules|parsers)"`.
+- A dispatcher tries a list of parsers, resolvers or pricing rules until one returns a value. Search: `grep -rnE "for .* of (handlers|resolvers|rules|parsers)" <src-dir>`.
 - Feature flags turn individual checks on and off inside one big method.
 - An event must bubble from a child element up through its parents until one parent handles it.
 

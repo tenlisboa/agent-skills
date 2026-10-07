@@ -1,0 +1,11 @@
+{
+  "version": "1.1.0",
+  "organization": "tenlisboa",
+  "date": "October 2026",
+  "abstract": "Refactor code and restructure architectures with the 22 Gang of Four design patterns, without dogma. The agent finds the places where change hurts and presents a Refactor Map with a full pattern, a lighter adaptation and a do-nothing option for each place. The user chooses, and the agent applies the choices in small steps that keep the tests green.",
+  "references": [
+    "https://refactoring.guru/design-patterns",
+    "https://refactoring.guru/refactoring/smells",
+    "https://refactoring.guru/refactoring/techniques"
+  ]
+}

@@ -12,8 +12,8 @@ Guarantee one instance of a class and give all code a global way to reach it. In
 
 Signals that a Singleton already exists and causes harm:
 
-- Static accessors. Search: `grep -nE "getInstance\(|\.instance\b|static\s+(_)?instance"`.
-- Module-level mutable state imported from many files. Search: `grep -nE "^export (let|const) \w+ = new "`.
+- Static accessors. Search: `grep -rnE "getInstance\(|\.instance\b|static\s+(_)?instance" <src-dir>`.
+- Module-level mutable state imported from many files. Search: `grep -rnE "^export (let|const) \w+ = new " <src-dir>`.
 - Tests that need `resetInstance()`, `jest.resetModules()`, or a fixed run order to pass. This is test pollution.
 - Functions whose signatures look pure but read config, clocks, loggers or clients from a global. The dependency is hidden.
 - Lazy init with locks or flags (`if (!instance)`) and race bugs under concurrency or in multi-worker setups.

@@ -11,10 +11,10 @@ Fix the order of steps in an algorithm in one place, and let variants supply onl
 ## Signals in code
 
 - Two or more classes or functions with the same sequence of steps. Only one or two steps differ. A diff between them shows mostly identical lines.
-- Copy-pasted "job", "importer", "handler" or "exporter" files with names like `ImportCsvJob`, `ImportXlsxJob`. Search: `grep -rlE "class \w+(Job|Importer|Exporter|Handler)\b" src`.
+- Copy-pasted "job", "importer", "handler" or "exporter" files with names like `ImportCsvJob`, `ImportXlsxJob`. Search: `grep -rlE "class \w+(Job|Importer|Exporter|Handler)\b" <src-dir>`.
 - A bug fix in the shared part had to be applied to every copy, or was missed in one.
 - Base classes with `protected abstract` methods and one public method that calls them. The pattern exists already, maybe partly.
-- Subclasses override a step only to do nothing, or to throw "not supported". Search: `grep -nE "override .*\{\s*\}" -r src`.
+- Subclasses override a step only to do nothing, or to throw "not supported". Search: `grep -rnE "override .*\{\s*\}" -r <src-dir> <src-dir>`.
 
 ## Do not use when
 

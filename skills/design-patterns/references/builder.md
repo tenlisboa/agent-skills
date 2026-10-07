@@ -10,8 +10,8 @@ Separate the step-by-step assembly of a complex object from the object itself. T
 
 ## Signals in code
 
-- A constructor or function with five or more parameters, many of them optional or `undefined`. Search: `grep -nE "new \w+\((\w+, ){5,}"`.
-- Call sites that pass positional `null`, `undefined` or `false` to skip arguments. Search: `grep -nE "\((.*, )?(null|undefined), (null|undefined)"`.
+- A constructor or function with five or more parameters, many of them optional or `undefined`. Search: `grep -rnE "new \w+\((\w+, ){5,}" <src-dir>`.
+- Call sites that pass positional `null`, `undefined` or `false` to skip arguments. Search: `grep -rnE "\((.*, )?(null|undefined), (null|undefined)" <src-dir>`.
 - Several overloaded constructors that call each other with default values (telescoping constructors).
 - An object built in many statements, with fields set one by one after `new`, and partly built objects passed around.
 - Validation for field combinations is repeated at each call site, or missing.
@@ -59,7 +59,7 @@ classDiagram
 7. When no call site uses the old constructor, make it private or package-internal.
 8. If the same sequence repeats at many call sites, Extract Method into a director function or a named preset.
 
-**Stop point:** after step 2. A parameter object removes most of the pain at very low cost. Continue only if invariants or multiple outputs justify a builder.
+**Stop point:** after step 2. A parameter object removes most of the pain at low cost. Continue only if invariants or multiple outputs justify a builder.
 
 ## Adaptations
 

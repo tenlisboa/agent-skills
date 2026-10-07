@@ -12,6 +12,7 @@ This repository is a collection of agent skills. The [skills](https://github.com
 skills/
   <skill-name>/          # kebab-case, equal to the `name` field in SKILL.md
     SKILL.md             # Required. Frontmatter + workflow. Keep it under 500 lines.
+    metadata.json        # Version, date, abstract and source links.
     references/          # Optional. Files that the agent reads on demand.
     scripts/             # Optional. Executable helpers.
                          # Test scenarios live in evals/<skill-name>/ at the repository root.
@@ -21,7 +22,7 @@ skills/
 
 1. Put the skill in `skills/<skill-name>/`. The directory name must be equal to the `name` field.
 2. Write a `description` that states when to use the skill. Include the words that a user types.
-3. Keep `SKILL.md` short. Move catalogs, tables and long examples to `references/`.
+3. Keep `SKILL.md` short. Move catalogs, tables and long examples to `references/`. A short index table that routes to reference files can stay in `SKILL.md`.
 4. Link each reference file directly from `SKILL.md`. Do not chain links more than one level deep.
 5. Run the baseline test before you write the skill. Record what an agent does without the skill.
 6. Run the same scenarios with the skill. Record the result in `evals/<skill-name>/`. Keep evals out of the skill folder, because the CLI installs that whole folder.

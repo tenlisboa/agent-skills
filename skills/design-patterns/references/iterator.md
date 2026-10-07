@@ -10,8 +10,8 @@ Give callers a uniform way to walk through the elements of a structure, one at a
 
 ## Signals in code
 
-- Callers read internal fields of a container to loop over it, for example `tree.root.children[i].children`. Search: `grep -rnE "\.(children|nodes|items|_data)\["`.
-- The same traversal (depth-first, paged API fetch, cursor over a result set) appears as a copy in several functions. Search: `grep -rnE "while \(.*(nextPage|cursor|hasMore|stack\.length)"`.
+- Callers read internal fields of a container to loop over it, for example `tree.root.children[i].children`. Search: `grep -rnE "\.(children|nodes|items|_data)\[" <src-dir>`.
+- The same traversal (depth-first, paged API fetch, cursor over a result set) appears as a copy in several functions. Search: `grep -rnE "while \(.*(nextPage|cursor|hasMore|stack\.length)" <src-dir>`.
 - A function loads a full dataset into an array only to loop over it once, and memory grows with input size.
 - Paging logic (`offset`, `limit`, `nextToken`) and business logic share the same loop.
 - A class exposes `getItems(): T[]` and callers mutate the returned array.

@@ -10,9 +10,9 @@ Put each variant of one algorithm behind a shared contract, so the caller picks 
 
 ## Signals in code
 
-- A `switch` or `if/else` chain on a mode, kind or provider name that selects how to compute one result. Search: `grep -nE "case ['\"][a-z_]+['\"]:" -r src | sort | uniq -c`.
+- A `switch` or `if/else` chain on a mode, kind or provider name that selects how to compute one result. Search: `grep -rnE "case ['\"][a-z_]+['\"]:" -r <src-dir> | sort | uniq -c <src-dir>`.
 - The same mode check appears in two or more functions or files. Each new mode forces edits in all of them.
-- A method has a boolean or enum flag that changes its whole body (`calculate(order, useNewRules)`). Search: `grep -nE "\((.*, )?(use|is|enable)[A-Z]\w+\)" -r src`.
+- A method has a boolean or enum flag that changes its whole body (`calculate(order, useNewRules)`). Search: `grep -rnE "\((.*, )?(use|is|enable)[A-Z]\w+\)" -r <src-dir> <src-dir>`.
 - Sibling classes differ only in one method body. The rest is copied.
 - Tests for one variant need to set up mocks for the dependencies of all other variants.
 - Merge conflicts cluster on one large "engine" or "calculator" file.
@@ -24,7 +24,7 @@ Put each variant of one algorithm behind a shared contract, so the caller picks 
 - The variants differ only in numbers, labels or thresholds. Use a lookup table or config object (`const RATES = { basic: 0.02, pro: 0.01 }`).
 - The language has first-class functions and the variant has no state. Pass a function or keep a map of functions. Do not create one class per variant.
 - The selection happens once at startup and never changes. Pick the function once in the composition root and inject it. Do not add a setter or a runtime swap mechanism.
-- The variants need very different inputs. A forced common signature hides the differences and leaks optional parameters. Keep separate functions.
+- The variants need different inputs. A forced common signature hides the differences and leaks optional parameters. Keep separate functions.
 - The caller cannot know which variant to pick. The pattern moves the choice to the client, so it must have that knowledge.
 
 ## Shape

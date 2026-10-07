@@ -10,10 +10,10 @@ Turn a request into a value that holds the operation and all its arguments. Code
 
 ## Signals in code
 
-- The same operation starts from several places (HTTP route, CLI, cron, UI button) and each place repeats the argument assembly. Search for repeated calls such as `grep -rn "refundOrder("`.
-- A `switch` on an action name string runs the matching operation. Search: `grep -nE "case ['\"](create|cancel|approve|archive)"`.
+- The same operation starts from several places (HTTP route, CLI, cron, UI button) and each place repeats the argument assembly. Search for repeated calls such as `grep -rn "refundOrder(" <src-dir>`.
+- A `switch` on an action name string runs the matching operation. Search: `grep -rnE "case ['\"](create|cancel|approve|archive)" <src-dir>`.
 - Code needs undo or redo, and it stores ad hoc "before" values next to each mutation.
-- Work must run later or elsewhere: a job queue, a retry table, an outbox, a scheduled task. Search: `grep -rnE "enqueue|addJob|schedule\(|outbox"`.
+- Work must run later or elsewhere: a job queue, a retry table, an outbox, a scheduled task. Search: `grep -rnE "enqueue|addJob|schedule\(|outbox" <src-dir>`.
 - An audit log must record who asked for what, with the exact arguments.
 - UI components or controllers import domain services directly and call them with many arguments.
 

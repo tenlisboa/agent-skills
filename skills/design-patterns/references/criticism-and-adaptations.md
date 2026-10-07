@@ -20,7 +20,7 @@ The result fits the book, not the project. Adapt the pattern to the size of the 
 Drop roles that do nothing. An abstract base with one subclass is a role that does nothing.
 
 ### 3. Unjustified use (the golden hammer)
-A developer who just learned patterns sees them everywhere. Simple code then gets factories, managers and wrappers.
+A developer who recently learned patterns sees them everywhere. Simple code then gets factories, managers and wrappers.
 The cost is real: more files, more jumps to follow a call, slower onboarding.
 The benefit is speculative: flexibility for a change that never comes.
 Speculative Generality and Lazy Class in [smells-to-patterns.md](smells-to-patterns.md) are the usual results.
@@ -49,11 +49,13 @@ Name it that way in comments or reviews so the team keeps a shared word for it.
 
 Run this test before you introduce any pattern. Stop at the first "no".
 
-1. **Is the variation real today?** Count the concrete variants in the code now. Two or more is real. One is speculative.
+1. **Is the variation real today?** Count the concrete variants in the code now. Two variants show real variation. One is speculative.
 2. **Did the user name the next change?** A dated plan ("the second provider ships in Q3") counts. "Maybe one day" does not.
 3. **Rule of three.** Tolerate the first copy. Note the second. Abstract at the third.
-4. **Is the cost of change high today?** Measure files touched per change (see [refactoring-playbook.md](refactoring-playbook.md)). If a change takes one file, no pattern can improve it.
+4. **Is the cost of change high today?** Measure files touched per change (see [refactoring-playbook.md](refactoring-playbook.md)). If a typical change touches one file in total, no pattern can improve it.
 5. **Can you undo the pattern cheaply?** If removing it later costs more than adding it now, wait.
+
+Thresholds: abstract duplicated code at the third copy. For Strategy, use classes only from four variants or when a variant has state. Below that, use functions.
 
 If the variation is speculative, write the simplest code. Keep it easy to refactor later.
 Good tests and small functions keep the door open. You do not need an abstraction for that.
@@ -65,7 +67,7 @@ Check these numbers before and after you apply a pattern. A pattern must improve
 | Signal | How to measure | Warning sign |
 |---|---|---|
 | Indirection count | Hops from the call site to the code that does the work | More than 3 hops for a simple operation |
-| Files touched per change | Median files per commit for a typical feature in the area | The number goes up after the refactor |
+| Files touched per change | Median of all files per commit, over the last 20 commits that touch the area | The number goes up after the refactor |
 | Types per feature | New classes or interfaces for one new variant | More than 2 for one variant |
 | Single-implementation interfaces | Interfaces with exactly one implementer | Any, unless the second one is dated |
 | Onboarding cost | Files a new developer must read to explain one flow | The flow crosses more than 5 files |
@@ -94,17 +96,7 @@ Try each rung in order. Stop at the first rung that removes the pain.
 
 ## How to present the choice to the user
 
-Give the user a short, explicit choice. Do not apply a full pattern without consent when a lighter option exists.
-Use this structure:
-
-```text
-Diagnosis: <one sentence on the real constraint, for example "each new carrier edits 6 files">.
-Option A, no pattern: <classic refactoring>. Cost: <files, hops>. Limit: <what it does not solve>.
-Option B, lighter adaptation: <idiom or reduced pattern>. Cost: <...>. Limit: <...>.
-Option C, full <Pattern>: <roles to create>. Cost: <...>. Pays off when: <named condition>.
-Recommendation: <A, B or C> because <evidence from the code or the user's stated next change>.
-Not doing: <what this choice leaves out>.
-```
+Present the choice with the Refactor Map template in [SKILL.md](../SKILL.md). Option A is the full pattern, option B is the lighter form, and option C is to leave the code as it is. A classic refactoring with no pattern is a form of option B.
 
 Rules for the recommendation:
 

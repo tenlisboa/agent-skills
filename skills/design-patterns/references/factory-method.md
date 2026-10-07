@@ -10,7 +10,7 @@ Move the choice of which concrete class to instantiate out of the code that uses
 
 ## Signals in code
 
-- A class runs one fixed workflow, but one collaborator inside it changes per variant. Search: `grep -nE "new (Csv|Json|Xml)[A-Z]\w*\("`.
+- A class runs one fixed workflow, but one collaborator inside it changes per variant. Search: `grep -rnE "new (Csv|Json|Xml)[A-Z]\w*\(" <src-dir>`.
 - A `switch` on a type code that picks a class to instantiate, and is copied in two or more places. One such switch is acceptable (see smells-to-patterns.md).
 - Subclasses exist only to swap one dependency, and they copy the parent method to change one `new` call.
 - A framework or library class hard-codes `new DefaultThing()`, and users ask how to plug in their own `Thing`.

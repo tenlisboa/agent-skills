@@ -52,12 +52,12 @@ Type-code switches, which are the main lead for [Strategy](strategy.md) and [Sta
 The result is a lead, not a measure. Read each match before you act.
 
 ```bash
-grep -rniE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist \
+grep -rnE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist \
   --exclude-dir=build --exclude-dir=vendor \
   --include='*.py' --include='*.js' --include='*.mjs' --include='*.cjs' --include='*.jsx' \
   --include='*.ts' --include='*.tsx' --include='*.java' --include='*.kt' --include='*.go' \
   --include='*.rb' --include='*.cs' --include='*.php' --include='*.swift' --include='*.rs' \
-  "(switch *\(|case |elif |else if ).*(type|kind|status|state|mode)\b" <src-dir> \
+  "(switch *\(|case |elif |else if ).*((^|[^A-Za-z0-9])(type|kind|status|state|mode)|[a-z](Type|Kind|Status|State|Mode))\b" <src-dir> \
   | cut -d: -f1 | sort | uniq -c | sort -rn | head -20
 ```
 

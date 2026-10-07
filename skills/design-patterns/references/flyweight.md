@@ -6,13 +6,13 @@
 
 ## Intent
 
-Cut memory use when a program holds very many similar objects. Store the heavy, repeated, immutable part once and share it, and keep only the small per-object part in each instance.
+Cut memory use when a program holds many similar objects. Store the heavy, repeated, immutable part once and share it, and keep only the small per-object part in each instance.
 
 ## Signals in code
 
 - A heap snapshot or memory profile shows millions of instances of one class, with the same values in most fields.
 - Objects that copy the same large data, for example a style, a schema, a texture, a font or a price table, into each instance.
-- Loops that create a new object per row, cell, particle or event with mostly constant fields. Search: `grep -rnE "new (Style|Font|Format|Schema)\(" src/`.
+- Loops that create a new object per row, cell, particle or event with mostly constant fields. Search: `grep -rnE "new (Style|Font|Format|Schema)\(" <src-dir>`.
 - Out-of-memory crashes or long GC pauses that grow with input size, while the number of distinct values stays small.
 - Large exports or imports (spreadsheets, logs, map data) that hold the whole dataset in memory as rich objects.
 

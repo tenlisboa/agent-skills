@@ -6,7 +6,8 @@ Use this file during code inventory. Find the smell, run the hint, then apply th
 Consider a pattern only after that. Most smells end with a classic refactoring and no pattern.
 Before you apply a pattern, run the tests in [criticism-and-adaptations.md](criticism-and-adaptations.md). To execute, follow [refactoring-playbook.md](refactoring-playbook.md).
 
-Each entry has a **Signal** (what you see), a **Hint** (a lead, not proof), a **First move**, 0 to 3 **Patterns**, and a **Decide** question.
+Each entry has a **Signal** (what you see), a **First move**, 0 to 3 **Patterns**, and a **Decide** question. Most entries also have a **Hint** (a lead, not proof).
+Replace `<src-dir>` with the source root of the project (for example `src`, `lib`, `app`). Replace `<path/to/file>` with a real path.
 
 ## Quick map
 
@@ -40,35 +41,35 @@ Each entry has a **Signal** (what you see), a **Hint** (a lead, not proof), a **
 
 ### Long Method
 - **Signal:** One function does several jobs. You need inner comments to follow it.
-- **Hint:** `lizard -L 50 src/` (any language), or `radon cc -s -n C src/` (Python), or the ESLint `max-lines-per-function` rule.
+- **Hint:** `uvx lizard -w -L 50 <src-dir> | head -40` (any language, `-w` prints only functions over the limits), or `radon cc -s -n C <src-dir>` (Python), or the ESLint `max-lines-per-function` rule.
 - **First move:** Extract Method, Decompose Conditional, Replace Temp with Query. If locals block extraction, use Replace Method with Method Object.
 - **Patterns:** None. [Template Method](template-method.md) only when two or more long methods share one step order.
 - **Decide:** Do several methods run the same steps in the same order with different step bodies? If no, stop after Extract Method.
 
 ### Large Class
 - **Signal:** A class has many fields and methods and changes for unrelated reasons.
-- **Hint:** `find src -name '*.*' -exec wc -l {} + | sort -rn | head -20`, then count methods per class.
+- **Hint:** `find <src-dir> -type f \( -name '*.ts' -o -name '*.js' -o -name '*.py' \) -exec wc -l {} + | grep -v ' total$' | sort -rn | head -20`, then count methods per class. Add the extensions of your language.
 - **First move:** Extract Class for each responsibility. Use Extract Subclass for rare variants. Use Extract Interface to document what clients use.
 - **Patterns:** [Strategy](strategy.md), [State](state.md), [Facade](facade.md).
 - **Decide:** What does the extracted part vary on? A family of algorithms gives Strategy. A lifecycle status gives State. Several new classes that clients still need as one entry point give Facade. Nothing varies: plain Extract Class.
 
 ### Primitive Obsession
 - **Signal:** Money as a float, roles as integer constants, string keys used as field names.
-- **Hint:** `grep -rnE "\b(ROLE|TYPE|STATUS|KIND|MODE)_[A-Z_]+ *= *[0-9]+" src/`
+- **Hint:** `grep -rnE "\b(ROLE|TYPE|STATUS|KIND|MODE)_[A-Z_]+ *= *[0-9]+" <src-dir>`
 - **First move:** Replace Data Value with Object (a value object). Replace Type Code with Class or with an enum.
 - **Patterns:** [State](state.md) or [Strategy](strategy.md), through Replace Type Code with State/Strategy.
 - **Decide:** Does the code only label data? Use an enum and stop. Does the value change during the object's life and change behavior? State. Is it set once and selects an algorithm? Strategy.
 
 ### Long Parameter List
 - **Signal:** More than three or four parameters. Call sites pass many literals or `None`.
-- **Hint:** `grep -rnE "(def|function|func) \w+\(([^,)]*,){4,}" src/`
+- **Hint:** `grep -rnE "(def|function|func) \w+\(([^,)]*,){4,}" <src-dir>`
 - **First move:** Introduce Parameter Object, Preserve Whole Object, Replace Parameter with Method Call.
 - **Patterns:** [Builder](builder.md), rarely.
 - **Decide:** Is it a constructor with many optional parts, step-wise assembly or cross-field validation? If the language has named arguments with defaults, use them instead of Builder.
 
 ### Data Clumps
 - **Signal:** The same group of three or more values travels together (host, port, user).
-- **Hint:** Grep for a repeated parameter sequence, for example `grep -rn "host, port, user" src/`.
+- **Hint:** Grep for a repeated parameter sequence, for example `grep -rn "host, port, user" <src-dir>`.
 - **First move:** Extract Class, Introduce Parameter Object, Preserve Whole Object. Then move the code that uses the group into the new class.
 - **Patterns:** None.
 - **Decide:** Does passing the whole object create a dependency you do not want? If yes, keep the primitives.
@@ -77,21 +78,21 @@ Each entry has a **Signal** (what you see), a **Hint** (a lead, not proof), a **
 
 ### Alternative Classes with Different Interfaces
 - **Signal:** Two classes do the same job with different method names.
-- **Hint:** Look for sibling names: `grep -rnE "class \w*(Client|Gateway|Service|Helper)\b" src/`
+- **Hint:** Look for sibling names: `grep -rnE "class \w*(Client|Gateway|Service|Helper)\b" <src-dir>`
 - **First move:** Rename Method, Move Method, Parameterize Method. Extract Superclass for partial overlap. Then delete one class.
 - **Patterns:** [Adapter](adapter.md), only when one side is third-party or frozen.
 - **Decide:** Can you edit both classes? If yes, merge them and use no pattern. If no, adapt the frozen one to your interface.
 
 ### Refused Bequest
 - **Signal:** A subclass ignores inherited members, or overrides them to throw.
-- **Hint:** `grep -rnE "raise NotImplementedError|throw new (UnsupportedOperation|NotImplemented)" src/`
+- **Hint:** `grep -rnE "raise NotImplementedError|throw new (UnsupportedOperation|NotImplemented)" <src-dir>`
 - **First move:** Replace Inheritance with Delegation. If inheritance is valid, use Extract Superclass with only the shared part.
 - **Patterns:** None. Composition fixes this without a named pattern.
 - **Decide:** Is the subclass truly a kind of the parent for all callers? If no, delegate.
 
 ### Switch Statements
 - **Signal:** The same `switch` or `if/elif` chain over a type code appears in several places.
-- **Hint:** `grep -rnE "(switch *\(|case |elif |else if ).*\b(type|kind|status|state|mode)\b" src/`
+- **Hint:** `grep -rnE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build --exclude-dir=vendor --include='*.py' --include='*.js' --include='*.mjs' --include='*.cjs' --include='*.jsx' --include='*.ts' --include='*.tsx' --include='*.java' --include='*.kt' --include='*.go' --include='*.rb' --include='*.cs' --include='*.php' --include='*.swift' --include='*.rs' "(switch *\(|case |elif |else if ).*((^|[^A-Za-z0-9])(type|kind|status|state|mode)|[a-z](Type|Kind|Status|State|Mode))\b" <src-dir>`. It is a lead, not a measure.
 - **First move:** Extract Method and Move Method to isolate the switch. Then Replace Type Code with Subclasses or State/Strategy, and Replace Conditional with Polymorphism. Use Introduce Null Object for a null branch.
 - **Patterns:** [Strategy](strategy.md), [State](state.md), [Factory Method](factory-method.md).
 - **Decide:** Is there only one switch with simple branches? Leave it. Does the case value change at runtime with transitions? State. Is it chosen once and selects an algorithm? Strategy, or a map of functions. Does the switch only pick a class to create? Keep it in one Factory Method. That switch is acceptable.
@@ -107,14 +108,14 @@ Each entry has a **Signal** (what you see), a **Hint** (a lead, not proof), a **
 
 ### Divergent Change
 - **Signal:** One class changes for many unrelated reasons. A new product type touches search, display and ordering methods.
-- **Hint:** Read the commit subjects for one file: `git log --format=%s -- path/to/file | head -40`.
+- **Hint:** Read the commit subjects for one file: `git log --format=%s -- <path/to/file> | head -40`.
 - **First move:** Extract Class, one class per reason to change.
 - **Patterns:** [Strategy](strategy.md), [Bridge](bridge.md).
 - **Decide:** How many independent axes vary? One axis with many variants gives Strategy. Two axes that multiply subclasses give Bridge. No axis: plain Extract Class.
 
 ### Shotgun Surgery
 - **Signal:** One logical change edits many files with small edits.
-- **Hint:** Find files that change together with a target: `git log --format=%H -- path/to/file | xargs -I{} git show --name-only --format= {} | sort | uniq -c | sort -rn | head`.
+- **Hint:** Find files that change together with a target. Use the co-change command in [refactoring-playbook.md](refactoring-playbook.md#step-1-find-the-hotspots).
 - **First move:** Move Method and Move Field to gather the behavior in one place. Inline Class on the shells that remain.
 - **Patterns:** [Facade](facade.md), rarely.
 - **Decide:** Are the scattered edits the same call sequence into one subsystem? If yes, put that sequence behind a Facade. If no, gather the code into one module and stop.
@@ -135,10 +136,10 @@ Each entry has a **Signal** (what you see), a **Hint** (a lead, not proof), a **
 
 ### Duplicate Code
 - **Signal:** Two fragments are almost the same.
-- **Hint:** `npx jscpd src/`, PMD CPD, or `pylint --disable=all --enable=duplicate-code src/`.
+- **Hint:** `npx jscpd <src-dir>`, PMD CPD, or `pylint --disable=all --enable=duplicate-code <src-dir>`.
 - **First move:** Extract Method, Pull Up Method, Extract Superclass, Substitute Algorithm, Consolidate Duplicate Conditional Fragments.
 - **Patterns:** [Template Method](template-method.md), [Strategy](strategy.md).
-- **Decide:** Are the copies identical? Extract Method, no pattern. Same skeleton, different steps, and the copies already live in subclasses? Template Method. Same skeleton, but no hierarchy or a runtime choice? Pass a function or use Strategy. Wait for the third copy before you abstract.
+- **Decide:** Are the copies identical? Extract Method, no pattern. Same skeleton, different steps, and the copies already live in subclasses? Template Method. Same skeleton, but no hierarchy or a runtime choice? Pass a function, and use Strategy classes only from four variants or when a variant has state. Wait for the third copy before you abstract.
 
 ### Data Class
 - **Signal:** A class has only fields and accessors. Callers hold all the logic.
@@ -148,7 +149,7 @@ Each entry has a **Signal** (what you see), a **Hint** (a lead, not proof), a **
 
 ### Dead Code
 - **Signal:** A variable, parameter, method, class or file has no use.
-- **Hint:** `vulture src/` (Python), `npx knip` (TypeScript), `staticcheck ./...` (Go), or IDE "find usages".
+- **Hint:** `vulture <src-dir>` (Python), `npx knip` (TypeScript), `staticcheck ./...` (Go), or IDE "find usages".
 - **First move:** Delete it. Use Remove Parameter, Inline Class or Collapse Hierarchy as needed.
 - **Patterns:** None.
 - **Decide:** Do tests, reflection or external plugins call it? Check before you delete.
@@ -176,21 +177,21 @@ Each entry has a **Signal** (what you see), a **Hint** (a lead, not proof), a **
 
 ### Inappropriate Intimacy
 - **Signal:** A class reads or writes private members of another class.
-- **Hint:** `grep -rnE "\b[a-z]\w*\._[a-z]\w*" src/` (Python private access on other objects), or reflection calls.
+- **Hint:** `grep -rnE "\b[a-z]\w*\._[a-z]\w*" <src-dir> | grep -vE '\b(self|cls|this)\._'` (access to private members of other objects), or reflection calls.
 - **First move:** Move Method, Move Field, Extract Class, Hide Delegate, Change Bidirectional Association to Unidirectional.
 - **Patterns:** [Mediator](mediator.md), only for many-to-many tangles.
 - **Decide:** Are two classes involved, or many with mutual references? Two: move or hide. Many: route their talk through a Mediator.
 
 ### Incomplete Library Class
 - **Signal:** A library lacks a method you need. Helper functions around it spread through the code.
-- **Hint:** `grep -rnE "^(import|from) <vendor>" src/ | cut -d: -f1 | sort -u | wc -l` shows how far the vendor spreads.
+- **Hint:** `grep -rlE "^(import|from) <vendor>|from ['\"]<vendor>['\"]|require\(['\"]<vendor>['\"]\)" <src-dir> | wc -l` counts the files that import the vendor. Replace `<vendor>` with the package name.
 - **First move:** Introduce Foreign Method for one or two helpers. Introduce Local Extension for more.
 - **Patterns:** [Adapter](adapter.md), [Decorator](decorator.md), [Facade](facade.md).
 - **Decide:** Do you need a different interface? Adapter. The same interface with extra behavior? Decorator. One small entry point to a large library? Facade.
 
 ### Message Chains
 - **Signal:** Calls like `a.b().c().d()` navigate an object graph.
-- **Hint:** `grep -rnE "\.\w+\([^)]*\)\.\w+\([^)]*\)\.\w+\(" src/`. Fluent builders and query DSLs are not this smell.
+- **Hint:** `grep -rnE "\.\w+\([^)]*\)\.\w+\([^)]*\)\.\w+\(" <src-dir>`. String chains (`.trim().toLowerCase()`), fluent builders and query DSLs are not this smell.
 - **First move:** Hide Delegate, or Extract Method on what the end object does, then Move Method up the chain.
 - **Patterns:** [Facade](facade.md), rarely.
 - **Decide:** Does the chain cross into a subsystem that many callers navigate the same way? If yes, Facade. Do not hide so much that you create Middle Man.

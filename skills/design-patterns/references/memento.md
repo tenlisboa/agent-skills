@@ -10,7 +10,7 @@ Let an object export an opaque copy of its own state and later restore itself fr
 
 ## Signals in code
 
-- Code outside a class copies its fields one by one to save them, then writes them back to undo. Search: `grep -rnE "(prev|old|backup|saved)[A-Z]\w* = .*\.\w+"`.
+- Code outside a class copies its fields one by one to save them, then writes them back to undo. Search: `grep -rnE "(prev|old|backup|saved)[A-Z]\w* = .*\.\w+" <src-dir>`.
 - Fields are public, or have setters, only so that an undo or reset feature can restore them.
 - A `try` block changes several fields and the `catch` block reverts them by hand.
 - Undo, "discard changes" or "reset to saved" logic appears as a copy in several screens.

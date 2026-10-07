@@ -41,7 +41,7 @@ The right pattern depends on what will change next. Patterns pay off only where 
 - If the request says what will change ("more payment methods next quarter"), use that and go to Phase 2.
 - If the code shows that a stated need is already met, keep the need and mark your doubt "to confirm" in the map.
 - If the request does not say what will change, ask one question before the inventory. Give two or three concrete guesses from the file names.
-- If you run without a user (the user said not to ask, or you run in CI or headless mode), write your assumption at the top of the map and mark it "to confirm".
+- If you run without a user, write your assumption at the top of the map and mark it "to confirm". You run without a user when the user said not to ask, or in CI or headless mode.
 
 ### Phase 2: Inventory (read only)
 
@@ -51,8 +51,9 @@ Do not edit files in this phase.
 2. If you cannot run git or a shell, rank files by size and by the description of the user.
 3. Keep a maximum of 7 hotspots for this map. Put the others in "Later waves".
 4. For each hotspot, write the observed signal with `path:line`. Route it with [smells-to-patterns.md](references/smells-to-patterns.md).
-5. Note the safety net: the tests that exist, and the characterization tests that are necessary before a change.
-6. If the project has no test runner, plan a script that prints the outputs of the entry points for fixed inputs. Diff its output before and after each change. Ask before you add a test framework.
+5. In the commands of the references, replace `<src-dir>`, `<test-dir>` and `<path/to/file>` with real paths of the project.
+6. Note the safety net: the tests that exist, and the characterization tests that are necessary before a change.
+7. If the project has no test runner, plan a script that prints the outputs of the entry points for fixed inputs. Diff its output before and after each change. Ask before you add a test framework.
 
 ### Phase 3: Decide each hotspot
 
@@ -66,7 +67,7 @@ Use the decision ladder from [criticism-and-adaptations.md](references/criticism
 
 In the map, rung 1 is option C, the best of rungs 2 to 4 is option B, and rung 5 is option A. Before you recommend rung 3, 4 or 5, read the pattern file. Check its "Do not use when" section against the code. Check its "Adaptations" section for the language of the project.
 
-In Python, JavaScript, TypeScript, Go, Ruby and Kotlin, a function or a map of functions is usually the default for Strategy, Command and Template Method. If the language has no classes (C, Elixir, shell, SQL), option A is the idiomatic full form, for example a struct of function pointers in C or a behaviour in Elixir. If no such form exists, offer only B and C.
+In Python, JavaScript, TypeScript, Go, Ruby and Kotlin, a function or a map of functions is usually the default for Strategy, Command and Template Method. If the language has no classes (C, Elixir, shell, SQL), option A is the idiomatic full form. Examples are a struct of function pointers in C or a behaviour in Elixir. If no such form exists, offer only B and C.
 
 ### Phase 4: Present the Refactor Map, then stop
 

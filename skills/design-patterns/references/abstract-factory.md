@@ -10,7 +10,7 @@ Create groups of related objects that must work together, without the client nam
 
 ## Signals in code
 
-- Two or more `switch` statements on the same environment key, each picking a different related class. Search: `grep -nE "(case|===?) ['\"](aws|gcp|local|azure)['\"]"`.
+- Two or more `switch` statements on the same environment key, each picking a different related class. Search: `grep -rnE "(case|===?) ['\"](aws|gcp|local|azure)['\"]" <src-dir>`.
 - A bug class where objects from different variants were mixed. Example: a production queue client paired with an in-memory blob store.
 - Parallel class names with a shared prefix across several kinds. Example: `S3Storage`, `SqsQueue`, `LocalStorage`, `LocalQueue`.
 - Test setup builds many fakes by hand and must keep them consistent with each other.

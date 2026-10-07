@@ -10,9 +10,9 @@ Put a stand-in object with the same interface in front of a real object, so you 
 
 ## Signals in code
 
-- Many callers check a cache before they call the same service, each with their own map and expiry logic. Search: `grep -rnE "cache\.(get|has)\(" src/ | wc -l`.
+- Many callers check a cache before they call the same service, each with their own map and expiry logic. Search: `grep -rnE "cache\.(get|has)\(" <src-dir> | wc -l`.
 - Heavy objects (SDK clients, ML models, large files) created at startup but used by few requests.
-- Permission checks repeated at the top of many methods of one service. Search: `grep -rnE "if ?\(!.*(canAccess|isAllowed|hasPermission)" src/`.
+- Permission checks repeated at the top of many methods of one service. Search: `grep -rnE "if ?\(!.*(canAccess|isAllowed|hasPermission)" <src-dir>`.
 - Callers wrap a remote client in the same timeout, serialization and error mapping code.
 - `let instance: X | null = null` plus "create if null" blocks copied in several modules.
 - The real class is a vendor or `final` class, so you cannot add these checks inside it.

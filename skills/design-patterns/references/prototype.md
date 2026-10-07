@@ -10,10 +10,10 @@ Create new objects by copying a configured instance instead of constructing them
 
 ## Signals in code
 
-- Subclasses that differ only in the values their constructors set. Search: `grep -nE "class \w+ extends \w+"` and look for bodies with only `super(...)` and field assignments.
+- Subclasses that differ only in the values their constructors set. Search: `grep -rnE "class \w+ extends \w+" <src-dir>` and look for bodies with only `super(...)` and field assignments.
 - Long setup blocks copied across files to produce near-identical objects, with one or two fields changed.
 - Code that copies objects field by field from outside the class, and breaks when someone adds a field.
-- Shallow copies that cause shared-state bugs. Search: `grep -nE "\{ ?\.\.\.\w+ ?\}|Object\.assign\("` near nested arrays or maps.
+- Shallow copies that cause shared-state bugs. Search: `grep -rnE "\{ ?\.\.\.\w+ ?\}|Object\.assign\(" <src-dir>` near nested arrays or maps.
 - A function receives an object through an interface and must duplicate it, but cannot name its class.
 - An undo history, a "duplicate" button or a "save as template" feature exists.
 - Object creation is expensive (parsing, compiling, remote fetch), and many copies share the same base state.
