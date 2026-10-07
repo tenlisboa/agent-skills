@@ -1,6 +1,6 @@
 ---
 name: design-patterns
-description: Use when refactoring code or restructuring an architecture with design patterns. Use it for god classes, long switch or if/else chains on a type, duplicated variants, tight coupling to a vendor SDK, hidden globals, over-engineered abstractions, or legacy modules that resist change. Also use it when the user asks which pattern fits, whether a pattern is overkill, or how to apply a Gang of Four pattern such as Strategy, Factory Method, Adapter, Observer, State or Decorator.
+description: Refactors code and restructures architectures with the 22 Gang of Four design patterns, and shows the user a map of options before any edit. Use when code shows god classes, long switch or if/else chains on a type, duplicated variants, tight coupling to a vendor SDK, hidden globals, over-engineered abstractions, or legacy modules that resist change. Also use when the user asks which pattern fits, whether a pattern is overkill, or how to apply a pattern such as Strategy, Factory Method, Adapter, Observer, State or Decorator.
 license: MIT
 metadata:
   author: tenlisboa
@@ -23,7 +23,7 @@ Select the mode from the request before you read any code.
 |---|---|---|
 | Asks what a pattern is, compares patterns, or asks which pattern fits | **Answer** | Read the file of each pattern in the question. Answer, and name the lighter form from the "Adaptations" section. No map. |
 | Names one location and one pattern ("make this a Strategy") | **Targeted** | Read the pattern file. Then follow the Targeted steps below. |
-| Names one location but no pattern ("clean up this function") | **Targeted** | Find the signal in [smells-to-patterns.md](references/smells-to-patterns.md). Name the candidate in one line, then follow the Targeted steps. |
+| Names one location but no pattern ("clean up this function") | **Targeted** | Find the signal in [smells-to-patterns.md](references/smells-to-patterns.md). Present a Refactor Map with one row and end the turn. If the smell routes to no pattern, offer the classic refactoring as option B. |
 | Asks to refactor a module, a codebase or an architecture | **Map** | Follow the five phases below. |
 
 ### Targeted steps
@@ -51,7 +51,7 @@ Do not edit files in this phase.
 2. If you cannot run git or a shell, rank files by size and by the description of the user.
 3. Keep a maximum of 7 hotspots for this map. Put the others in "Later waves".
 4. For each hotspot, write the observed signal with `path:line`. Route it with [smells-to-patterns.md](references/smells-to-patterns.md).
-5. In the commands of the references, replace `<src-dir>`, `<test-dir>` and `<path/to/file>` with real paths of the project.
+5. In the commands of the references, replace each placeholder in angle brackets with a real value of the project. Examples are `<src-dir>`, `<test-dir>`, `<area-dir>`, `<path/to/file>`, `<files>`, `<vendor>` and `<test command>`.
 6. Note the safety net: the tests that exist, and the characterization tests that are necessary before a change.
 7. If the project has no test runner, plan a script that prints the outputs of the entry points for fixed inputs. Diff its output before and after each change. Ask before you add a test framework.
 
@@ -67,7 +67,7 @@ Use the decision ladder from [criticism-and-adaptations.md](references/criticism
 
 In the map, rung 1 is option C, the best of rungs 2 to 4 is option B, and rung 5 is option A. Before you recommend rung 3, 4 or 5, read the pattern file. Check its "Do not use when" section against the code. Check its "Adaptations" section for the language of the project.
 
-In Python, JavaScript, TypeScript, Go, Ruby and Kotlin, a function or a map of functions is usually the default for Strategy, Command and Template Method. If the language has no classes (C, Elixir, shell, SQL), option A is the idiomatic full form. Examples are a struct of function pointers in C or a behaviour in Elixir. If no such form exists, offer only B and C.
+In Python, JavaScript, TypeScript, Go, Ruby and Kotlin, a function or a map of functions is usually the default for Strategy, Command and Template Method. If the language has no classes (C, Elixir, shell, SQL), option A is the idiomatic full form. Examples are a struct of function pointers in C or a behaviour in Elixir. If no such form exists, write option A as "none" and give the reason.
 
 ### Phase 4: Present the Refactor Map, then stop
 
@@ -115,7 +115,7 @@ When the reply comes:
 
 If you run without a user, follow these steps:
 
-1. Write the map to `REFACTOR_MAP.md` and commit it alone.
+1. Write the map to `REFACTOR_MAP.md`. If commits are allowed, commit it alone.
 2. Apply only recommendations at rungs 1 to 4. A full pattern (rung 5) waits for the confirmation of the user.
 3. List the open questions at the end of your report.
 
@@ -131,7 +131,7 @@ Follow [refactoring-playbook.md](references/refactoring-playbook.md). For each c
 4. Make one or more commits for each row. Do not mix two rows in one commit. Tests for a new seam go in the commit of their row.
 5. Keep the behavior. If you find a bug, pin it with a test, list it, and ask before you fix it.
 
-If the user did not allow commits, stop after each row. Show the diff summary and the test result.
+Commit only when the user or the instructions of the repository allow it. If commits are not allowed, stop after each row and show the diff summary and the test result.
 
 After all rows, report: what changed for each row, the line delta, the test result, and the next wave.
 

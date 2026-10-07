@@ -12,14 +12,14 @@ Add new operations over a fixed set of node types without editing those types ea
 
 - A tree or graph of different node classes (AST, rule tree, document model, UI schema) with many unrelated operations on it.
 - Node classes collect methods for printing, validating, evaluating, serializing and pricing. Each method has one implementation per node class.
-- `instanceof` or type-tag chains that walk a structure. Search: `grep -rnE "instanceof (\w+Node|\w+Expr)" -r <src-dir> <src-dir>`.
+- `instanceof` or type-tag chains that walk a structure. Search: `grep -rnE "instanceof (\w+Node|\w+Expr)" <src-dir>`.
 - A new operation forces edits in every node class file.
 - The same recursive walk is copied in several functions. Only the per-node action differs.
 - Existing `accept(visitor)` methods. Check if every visitor needs every node type.
 
 ## Do not use when
 
-- The language has discriminated unions or pattern matching with exhaustiveness checks. Use a `switch` or `match` over a union. This covers TypeScript, Rust, Kotlin sealed classes, Scala, Swift, Java 17+ sealed types with Java 21 pattern `switch`, and Python 3.10 `match` (no exhaustiveness, use pyright or mypy with `assert_never`).
+- The language has discriminated unions or pattern matching with exhaustiveness checks. Use a `switch` or `match` over a union. This covers TypeScript, Rust, Kotlin sealed classes, Scala, Swift, and Java 17+ sealed types with Java 21 pattern `switch`. Python 3.10 `match` also works, but it has no exhaustiveness check. Use pyright or mypy with `assert_never`.
 - Node types change more often than operations. Visitor makes each new node type a change to every visitor. Keep methods on the nodes.
 - There are one or two operations. Put them on the nodes, or write one function with a `switch`.
 - The structure is homogeneous (one node type with a `kind` field). A map from `kind` to handler is enough.
@@ -68,7 +68,7 @@ classDiagram
 - **Rust:** `enum` plus `match`. Exhaustive by default.
 - **Kotlin, Java:** Kotlin sealed interfaces plus `when`, or Java 17+ sealed types with Java 21 pattern `switch`. The compiler checks completeness.
 - **Python 3.10+:** `match` with class patterns. Exhaustiveness is not enforced, so add a final `case _: raise` and test each type.
-- **Classic Visitor still fits:** Java before 21, C# and C++ without closed hierarchies, or a node set that is closed and owned by one package while third parties add operations. If third parties add node types, neither Visitor nor unions fit. Keep methods on the nodes.
+- **Classic Visitor still fits:** Java before 21, and C# or C++ without closed hierarchies. It also fits a closed node set that one package owns, while third parties add operations. If third parties add node types, neither Visitor nor unions fit. Keep methods on the nodes.
 - **Generic visitor return types:** use `Visitor<R>` so each operation returns its own result type, instead of a mutable accumulator.
 - **Library visitors:** compiler and linter toolkits supply walkers. Override only the node methods you need.
 

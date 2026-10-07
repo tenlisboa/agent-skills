@@ -10,11 +10,11 @@ Let an object change its behavior when its internal mode changes, without a mode
 
 ## Signals in code
 
-- A `status`, `phase` or `mode` field that many methods read in a `switch` before they act. Search: `grep -rnE "switch \(this\.(status|state|phase)\)" -r <src-dir> <src-dir>`.
+- A `status`, `phase` or `mode` field that many methods read in a `switch` before they act. Search: `grep -rnE "switch \(this\.(status|state|phase)\)" <src-dir>`.
 - Guard clauses such as `if (order.status !== "paid") throw` repeated across services.
 - Transition rules spread over several files. Nobody can draw the full diagram from one place.
 - Bugs where an entity reached an "impossible" status, for example `shipped` without `paid`.
-- Boolean pairs that encode a mode (`isOpen && !isLocked`). Search: `grep -rnE "is[A-Z]\w+ && !is[A-Z]" -r <src-dir> <src-dir>`.
+- Boolean pairs that encode a mode (`isOpen && !isLocked`). Search: `grep -rnE "is[A-Z]\w+ && !is[A-Z]" <src-dir>`.
 - Fields that are valid only in some modes (`cancelledAt`, `retryCount`) and are `null` the rest of the time.
 
 ## Do not use when

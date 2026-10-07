@@ -26,9 +26,10 @@ skills/
 4. Link each reference file directly from `SKILL.md`. Do not chain links more than one level deep.
 5. Run the baseline test before you write the skill. Record what an agent does without the skill.
 6. Run the same scenarios with the skill. Record the result in `evals/<skill-name>/`. Keep evals out of the skill folder, because the CLI installs that whole folder.
-7. Validate the install before a release:
+7. Run the checks before a commit. CI runs the same commands.
 
 ```bash
+python3 scripts/check.py --ts
 npx skills add . --list
 ```
 

@@ -67,7 +67,8 @@ classDiagram
 - **Python:** keyword arguments with defaults, or `dataclasses.replace()` for variations. A builder is rarely needed.
 - **Go:** functional options (`New(required, WithTimeout(5*time.Second), WithRetries(3))`). This is the idiomatic Go builder.
 - **Rust:** the builder pattern is idiomatic because Rust has no default or named arguments. Crates like `derive_builder` generate it. Typestate builders can enforce required steps at compile time.
-- **Java/C#/Kotlin:** Lombok `@Builder` (also works on records). Kotlin and C# named and default arguments remove most needs.
+- **Java:** Lombok `@Builder` (also works on records).
+- **Kotlin, C#:** named and default arguments remove most needs.
 - **Test data builders:** a builder with valid defaults (`anOrder().withItems(3).build()`) is a strong use case in any language.
 - **Framework-native:** query builders (Knex, SQLAlchemy Core, jOOQ) and HTTP request builders already follow this pattern. Use them rather than writing your own.
 

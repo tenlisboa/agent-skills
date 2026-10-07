@@ -103,4 +103,4 @@ Rules for the recommendation:
 - Base it on evidence: counts of variants, churn data, or a change the user named.
 - State what you will not do. Every option must have a tradeoff.
 - Say how to escalate later. For example: "If a third carrier arrives, move the function map to Strategy classes."
-- If the user picks the full pattern against the evidence, apply it, but keep the roles minimal.
+- If the user picks the full pattern after seeing the options, apply it with the roles the user chose.

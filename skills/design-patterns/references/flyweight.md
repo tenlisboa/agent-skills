@@ -1,7 +1,7 @@
 # Flyweight
 
 **Category:** Structural
-**Also known as:** Cache
+**Also known as:** none (Refactoring Guru lists "Cache", but caching is a different idea, see Neighbors)
 **Source:** https://refactoring.guru/design-patterns/flyweight
 
 ## Intent
@@ -59,13 +59,13 @@ classDiagram
 1. Measure. Record heap size and object count for a realistic input. Set a target number.
 2. Split the class fields into two lists: intrinsic (repeated, never changes per object) and extrinsic (unique or changing).
 3. Make the intrinsic fields read-only. Set them only in the constructor. Freeze the object if the language allows it.
-4. Extract Class: move the intrinsic fields and the methods that use only them into a new flyweight class.
+4. Extract Class: move the intrinsic fields and the methods that use mostly them into a new flyweight class.
 5. Replace each extrinsic field use inside those methods with a method parameter (Add Parameter).
 6. Create the factory with a map keyed by a stable serialization of the intrinsic state.
 7. Change the creation sites to call the factory. Keep the extrinsic fields in the original class, which becomes the context.
 8. Measure again with the same input. Keep the change only if it meets the target.
 
-**Stop point:** after step 4 plus a factory lookup on the extracted intrinsic object (steps 6-7). Skip step 5 when the shared methods do not need extrinsic state. This gives most of the saving without changing method signatures.
+**Stop point:** steps 4, 6 and 7 without step 5. Skip step 5 when the shared methods do not need extrinsic state. This gives most of the saving without changing method signatures.
 
 ## Adaptations
 

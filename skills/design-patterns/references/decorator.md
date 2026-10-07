@@ -61,7 +61,7 @@ classDiagram
 3. Change construction to go through one factory or the composition root. Clients stop calling `new` on the core class.
 4. Create one decorator class that implements the interface and delegates every method to an inner instance.
 5. Wrap the core object in the pass-through decorator in the factory. Run the tests.
-6. In one commit, move one concern from the core class into the decorator (Move Method). Run the tests.
+6. In one commit, move one concern from the core class into the decorator (Move Method). If a flag controlled the concern, wrap only when the old flag was on. Run the tests.
 7. Repeat for each concern. Remove the related flags and `if` blocks from the core class.
 8. Write a test that pins the wrapper order, for example "retry outside timing" or "timing outside retry".
 

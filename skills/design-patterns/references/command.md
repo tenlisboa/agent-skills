@@ -61,7 +61,7 @@ classDiagram
 3. Change each call site to build that object and pass it to one function. Tests stay green because the function calls the old code.
 4. Stop point: a typed request object and a single handler already give audit logging and one place to add retries. Stop here if you need no queue or undo.
 5. Add an invoker. It runs the handler and adds cross-cutting steps (logging, validation, transactions) in one place.
-6. This changes behavior: callers lose the immediate result and error. Ask the user, and do it as its own commit. For deferred work, persist the command object instead of calling the handler. Make handlers idempotent. Include a command ID for deduplication.
+6. For deferred work, persist the command object instead of calling the handler. This changes behavior: callers lose the immediate result and error. Ask the user, and do it as its own commit. Make handlers idempotent. Include a command ID for deduplication.
 7. For undo, add `undo()` or store a memento before `execute()`. Push executed commands onto a history stack. Clear the redo stack after a new command.
 8. Use Replace Conditional with Polymorphism, or a handler map keyed by `type`, to remove the remaining `switch` on action names.
 

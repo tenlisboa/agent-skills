@@ -59,8 +59,8 @@ classDiagram
 3. Extract Interface: declare the target interface in the domain module. Use domain names and domain types only.
 4. Create the adapter class. Move the first call and its mapping into it (Move Method).
 5. Inject the adapter through the constructor or the composition root. Do not create it inside business code.
-6. Translate vendor errors into domain errors inside the adapter.
-7. Migrate the remaining call sites one per commit. Delete each local mapping after you migrate it.
+6. Translate vendor errors into domain errors inside the adapter. In the same commit, update each catch of the vendor error at the migrated call sites. Add a test for the error path.
+7. Migrate the remaining call sites one per commit. Update their catch blocks in the same commit. Delete each local mapping after you migrate it.
 8. Add a lint rule that blocks vendor imports outside the adapter folder, for example `no-restricted-imports`.
 
 **Stop point:** after step 5, new code uses the interface and old call sites still work. That partial state has value. You can finish the migration later, file by file.

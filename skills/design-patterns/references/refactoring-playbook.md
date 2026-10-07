@@ -28,7 +28,7 @@ git log --since=12.months --no-merges --format= --name-only -- <src-dir> \
   | sort | uniq -c | sort -rn | head -30
 ```
 
-Hotspot score (churn times line count) for source files that still exist, without tests:
+Hotspot score (churn times line count) for source files that still exist, without tests. Run it from the repository root:
 
 ```bash
 git log --since=12.months --no-merges --format= --name-only -- <src-dir> \

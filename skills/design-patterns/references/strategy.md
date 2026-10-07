@@ -10,9 +10,9 @@ Put each variant of one algorithm behind a shared contract, so the caller picks 
 
 ## Signals in code
 
-- A `switch` or `if/else` chain on a mode, kind or provider name that selects how to compute one result. Search: `grep -rnE "case ['\"][a-z_]+['\"]:" -r <src-dir> | sort | uniq -c <src-dir>`.
+- A `switch` or `if/else` chain on a mode, kind or provider name that selects how to compute one result. Search: `grep -rhoE "case ['\"][a-z_]+['\"]:" <src-dir> | sort | uniq -c | sort -rn`.
 - The same mode check appears in two or more functions or files. Each new mode forces edits in all of them.
-- A method has a boolean or enum flag that changes its whole body (`calculate(order, useNewRules)`). Search: `grep -rnE "\((.*, )?(use|is|enable)[A-Z]\w+\)" -r <src-dir> <src-dir>`.
+- A method has a boolean or enum flag that changes its whole body (`calculate(order, useNewRules)`). Search: `grep -rnE "\((.*, )?(use|is|enable)[A-Z]\w+\)" <src-dir>`.
 - Sibling classes differ only in one method body. The rest is copied.
 - Tests for one variant need to set up mocks for the dependencies of all other variants.
 - Merge conflicts cluster on one large "engine" or "calculator" file.

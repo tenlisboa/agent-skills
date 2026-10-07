@@ -37,7 +37,7 @@ Refactors code and restructures architectures with the 22 Gang of Four design pa
 
 - Three modes: answer a question, refactor one place, or map a whole module or architecture
 - A decision ladder from "leave it" to the full pattern, with the lighter form preferred in languages with first-class functions
-- One reference file for each of the 22 patterns: signals in code, counter-signals, a safe refactoring path with a stop point, adaptations per language and framework, the architecture-scale form, neighbors and a TypeScript example
+- One reference file for each of the 22 patterns. Each file has signals in code, counter-signals and a safe refactoring path with a stop point. It also has adaptations per language, the architecture-scale form, neighbors and a TypeScript example
 - A routing index from 23 code smells to the first refactoring and the pattern candidates
 - A playbook for large refactors: hotspots from churn and complexity, characterization tests, branch by abstraction, strangler fig, parallel change and metrics
 

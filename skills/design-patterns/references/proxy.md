@@ -60,7 +60,7 @@ classDiagram
 3. If you cannot extract an interface, subclass the real class as a fallback. Document why. If the class is final, wrap it behind a new interface (Adapter-style) instead. In TypeScript, a proxy can `implements RealClass` directly when the class has no private members.
 4. Create the proxy class. Implement every method as a plain delegation first. Run the tests.
 5. Wire the pass-through proxy in the composition root or a factory. Clients receive Subject.
-6. Move the control logic from the callers into the proxy, one caller per commit. Delete each local copy.
+6. List every client of the subject first. Logic in the proxy applies to all of them at once. If some clients had no check or no cache before, ask the user before you move the logic. Then move it into the proxy and delete each local copy.
 7. For caches, define the key, the expiry and the invalidation rule in writing before you ship.
 8. Add tests for the proxy itself: miss, hit, expiry, denied access or failed lazy creation.
 

@@ -55,10 +55,10 @@ classDiagram
 
 1. Draw the current call graph between the peers. List each "when X happens, do Y on Z" rule.
 2. Add tests at the group level that trigger each event and assert the effects on the other peers.
-3. Create the mediator as a plain object or function that the parent (screen, service, workflow runner) owns.
+3. Create the mediator as a plain object or function that the parent (screen, service, workflow runner) owns. Inject it into each peer through the constructor or a callback.
 4. Move one rule at a time. Replace the direct sibling call with a call to the mediator. Use Move Method to put the rule in the mediator.
 5. Stop point: after the most tangled rules move, the remaining direct calls may be fine. Stop if you can now reuse the peers.
-6. Remove sibling references from each peer. Inject the mediator instead, through the constructor or a callback.
+6. Remove the sibling references from each peer.
 7. Extract Interface for the mediator only when one peer must work under two different mediators.
 8. Watch the mediator size. When it exceeds one use case, split it per workflow or per screen.
 
