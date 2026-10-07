@@ -54,9 +54,10 @@ classDiagram
 2. Introduce Parameter Object first. Replace the parameter list with one typed options object. Often this solves the problem, so stop here.
 3. If assembly has order rules or cross-field validation, Extract Class: create a builder with one method per optional part.
 4. Make the builder methods return `this` for chaining. Put required parameters in the builder constructor.
-5. Move all validation into `build()`. Make the product constructor private or package-internal if the language allows it.
-6. Replace call sites one by one. Keep the old constructor as a deprecated wrapper that delegates to the builder.
-7. If the same sequence repeats at many call sites, Extract Method into a director function or a named preset.
+5. Move cross-field validation into `build()`.
+6. Replace call sites one by one. If you need a compatibility shim, add a deprecated static `Product.fromLegacy(a, b, c)` that delegates to the builder. Do not wrap the constructor itself.
+7. When no call site uses the old constructor, make it private or package-internal.
+8. If the same sequence repeats at many call sites, Extract Method into a director function or a named preset.
 
 **Stop point:** after step 2. A parameter object removes most of the pain at very low cost. Continue only if invariants or multiple outputs justify a builder.
 
@@ -64,9 +65,9 @@ classDiagram
 
 - **Default for TypeScript/JavaScript:** an options object with defaults and a factory function that validates. Use a fluent builder only for query-like objects or when steps are conditional and many.
 - **Python:** keyword arguments with defaults, or `dataclasses.replace()` for variations. A builder is rarely needed.
-- **Go:** functional options (`New(required, WithTimeout(5), WithRetries(3))`). This is the idiomatic Go builder.
+- **Go:** functional options (`New(required, WithTimeout(5*time.Second), WithRetries(3))`). This is the idiomatic Go builder.
 - **Rust:** the builder pattern is idiomatic because Rust has no default or named arguments. Crates like `derive_builder` generate it. Typestate builders can enforce required steps at compile time.
-- **Java/C#/Kotlin:** Lombok `@Builder` or records in Java. Named and default arguments in Kotlin and C# remove most needs.
+- **Java/C#/Kotlin:** Lombok `@Builder` (also works on records). Kotlin and C# named and default arguments remove most needs.
 - **Test data builders:** a builder with valid defaults (`anOrder().withItems(3).build()`) is a strong use case in any language.
 - **Framework-native:** query builders (Knex, SQLAlchemy Core, jOOQ) and HTTP request builders already follow this pattern. Use them rather than writing your own.
 

@@ -10,7 +10,7 @@ Add a responsibility to an object by wrapping it in another object with the same
 
 ## Signals in code
 
-- The same cross-cutting lines repeat at the start and end of many methods: timing, logging, retry, metrics, auth checks. Search: `grep -rnE "performance\.now\(\)|console\.time|startSpan\(" src/ | wc -l`.
+- The same cross-cutting lines repeat at the start and end of many methods: timing, logging, retry, metrics. Search: `grep -rnE "performance\.now\(\)|console\.time|startSpan\(" src/ | wc -l`.
 - Subclasses named after combined features, for example `CachedRetryingClient` or `LoggedEncryptedStore`.
 - Boolean flags in a constructor that turn optional behaviors on and off, for example `new Client({ retry: true, log: true, cache: false })`, with `if (this.opts.retry)` inside methods.
 - A class marked `final` or `sealed`, or a vendor class, that needs extra behavior.
@@ -24,6 +24,7 @@ Add a responsibility to an object by wrapping it in another object with the same
 - The interface has many methods and you want to change one. A full delegating wrapper costs a lot. Use a JavaScript `Proxy` or a mixin, or change the class.
 - The order of wrappers changes results in ways that callers must know. Make the pipeline explicit instead, for example a list of steps.
 - A wrapper must stop the call or choose another handler. That is Chain of Responsibility or Proxy.
+- The wrapper caches results, creates the real object lazily or checks access, and the service owner (not the client) decides it exists. That is Proxy.
 
 ## Shape
 
@@ -59,8 +60,8 @@ classDiagram
 2. Extract Interface for the core object if it has none. Clients now depend on the interface.
 3. Change construction to go through one factory or the composition root. Clients stop calling `new` on the core class.
 4. Create one decorator class that implements the interface and delegates every method to an inner instance.
-5. Move one cross-cutting concern from the core class into that decorator (Move Method). Run the tests.
-6. Wrap the core object in the factory. The external behavior stays the same.
+5. Wrap the core object in the pass-through decorator in the factory. Run the tests.
+6. In one commit, move one concern from the core class into the decorator (Move Method). Run the tests.
 7. Repeat for each concern. Remove the related flags and `if` blocks from the core class.
 8. Write a test that pins the wrapper order, for example "retry outside timing" or "timing outside retry".
 
@@ -81,8 +82,8 @@ Rule of thumb: use the language feature when the concern applies to one function
 
 ## At architecture scale
 
-- **HTTP middleware:** Express, Koa, ASP.NET and Go `net/http` handlers wrap the next handler. Each layer adds auth, logging, compression or rate limits.
-- **HTTP client interceptors:** Axios interceptors, Angular `HttpInterceptor` and OkHttp interceptors decorate outgoing calls with tokens, retries and tracing.
+- **HTTP middleware that always calls next:** compression, timing and logging layers in Express, Koa, ASP.NET or Go `net/http` form a decorator stack. Middleware that can stop the request (auth, rate limit) is Chain of Responsibility. See chain-of-responsibility.md.
+- **HTTP client interceptors that always pass the call on:** Axios interceptors, Angular `HttpInterceptor` and OkHttp interceptors decorate outgoing calls with tokens, retries and tracing. An interceptor that can cancel the call or return a cached response is Chain of Responsibility.
 - **gRPC interceptors and message-bus middleware:** the same idea on RPC and queue consumers.
 - **Service mesh sidecars:** Envoy or Linkerd add mTLS, retries and metrics around a service without code changes. The sidecar decorates the network interface.
 - **Stream wrappers:** gzip or encryption streams around a file or socket stream.

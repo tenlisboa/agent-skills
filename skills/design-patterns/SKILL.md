@@ -1,17 +1,19 @@
 ---
 name: design-patterns
-description: Use when refactoring or restructuring code or architecture with design patterns, or when code shows god classes, long switch or if/else chains on a type, duplicated variants, tight coupling to a vendor SDK, hidden globals, or legacy modules that resist change. Also use when the user asks which pattern fits, whether a pattern is overkill, or how to apply a Gang of Four pattern such as Strategy, Factory, Adapter, Observer, State or Decorator.
+description: Use when refactoring code or restructuring an architecture with design patterns. Use it for god classes, long switch or if/else chains on a type, duplicated variants, tight coupling to a vendor SDK, hidden globals, over-engineered abstractions, or legacy modules that resist change. Also use it when the user asks which pattern fits, whether a pattern is overkill, or how to apply a Gang of Four pattern such as Strategy, Factory Method, Adapter, Observer, State or Decorator.
 license: MIT
 metadata:
   author: tenlisboa
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Design Patterns for Refactoring
 
-A pattern is an option, not a goal. Find the places where change hurts, offer the user a full pattern, a lighter adaptation and a do-nothing option for each place, and let the user choose. Then apply the choices in small steps that keep the tests green.
+A pattern is an option, not a goal. Find the places where change hurts. For each place, offer a full pattern, a lighter adaptation and a do-nothing option, and let the user choose. Then apply the choices in small steps that keep the tests green.
 
 The catalog follows the 22 patterns of [Refactoring Guru](https://refactoring.guru/design-patterns). Each pattern has one reference file. The files add signals in code, counter-signals, a refactoring path, adaptations per language and the form of the pattern at architecture scale.
+
+**The explicit choice of the user wins.** It wins over your recommendation, over a "Do not use when" section and over a "stop point". State the cost one time, then do what the user chose.
 
 ## Choose the mode
 
@@ -19,9 +21,16 @@ Select the mode from the request before you read any code.
 
 | The request | Mode | What to do |
 |---|---|---|
-| Asks what a pattern is, or which pattern fits a snippet | **Answer** | Read the pattern file. Answer, and name the lighter adaptation from its "Adaptations" section. No map. |
-| Names one location and one pattern ("make this a Strategy") | **Targeted** | Read the pattern file. If its "Do not use when" section matches the code, say so in one line and ask. Else follow its "Refactoring path". |
+| Asks what a pattern is, compares patterns, or asks which pattern fits | **Answer** | Read the file of each pattern in the question. Answer, and name the lighter form from the "Adaptations" section. No map. |
+| Names one location and one pattern ("make this a Strategy") | **Targeted** | Read the pattern file. Then follow the Targeted steps below. |
+| Names one location but no pattern ("clean up this function") | **Targeted** | Find the signal in [smells-to-patterns.md](references/smells-to-patterns.md). Name the candidate in one line, then follow the Targeted steps. |
 | Asks to refactor a module, a codebase or an architecture | **Map** | Follow the five phases below. |
+
+### Targeted steps
+
+1. Compare the code with the "Do not use when" section of the pattern file.
+2. If a counter-signal matches, stop before you edit. Name the counter-signal, show the lighter form in a short sketch (10 lines maximum), and ask which one the user wants.
+3. If no counter-signal matches, or the user confirms the pattern, follow the "Refactoring path" of the file. Use Phase 5 below for tests and commits.
 
 ## Map mode
 
@@ -30,21 +39,24 @@ Select the mode from the request before you read any code.
 The right pattern depends on what will change next. Patterns pay off only where variation is real.
 
 - If the request says what will change ("more payment methods next quarter"), use that and go to Phase 2.
-- If the request does not say it, ask one question before the inventory: "What do you expect to add or change in this code in the next months?" Give two or three concrete guesses from the file names.
-- If the user is not available, write your assumption at the top of the map and mark it "to confirm".
+- If the code shows that a stated need is already met, keep the need and mark your doubt "to confirm" in the map.
+- If the request does not say what will change, ask one question before the inventory. Give two or three concrete guesses from the file names.
+- If you run without a user (the user said not to ask, or you run in CI or headless mode), write your assumption at the top of the map and mark it "to confirm".
 
 ### Phase 2: Inventory (read only)
 
 Do not edit files in this phase.
 
-1. Set the scope. If the scope has more than about 2,000 lines or 20 files, find hotspots first. Run the churn and complexity commands in [refactoring-playbook.md](references/refactoring-playbook.md) (Step 1).
-2. Keep a maximum of 7 hotspots for this map. Put the others in a "Later waves" list.
-3. For each hotspot, write the observed signal with `path:line`. Route it with [smells-to-patterns.md](references/smells-to-patterns.md).
-4. Note the safety net: which tests exist, and which characterization tests are necessary before a change.
+1. Set the scope. For more than about 2,000 lines or 20 files, find hotspots first with Step 1 of [refactoring-playbook.md](references/refactoring-playbook.md).
+2. If you cannot run git or a shell, rank files by size and by the description of the user.
+3. Keep a maximum of 7 hotspots for this map. Put the others in "Later waves".
+4. For each hotspot, write the observed signal with `path:line`. Route it with [smells-to-patterns.md](references/smells-to-patterns.md).
+5. Note the safety net: the tests that exist, and the characterization tests that are necessary before a change.
+6. If the project has no test runner, plan a script that prints the outputs of the entry points for fixed inputs. Diff its output before and after each change. Ask before you add a test framework.
 
 ### Phase 3: Decide each hotspot
 
-Climb the decision ladder from [criticism-and-adaptations.md](references/criticism-and-adaptations.md). Stop at the first step that removes the pain.
+Use the decision ladder from [criticism-and-adaptations.md](references/criticism-and-adaptations.md) to find the recommendation. The lowest rung that removes the pain is the recommendation. Fill options A, B and C in the map in all cases.
 
 1. **Nothing:** leave the code as it is.
 2. **Classic refactoring:** Extract Method, Move Method, Introduce Parameter Object, a lookup table.
@@ -52,23 +64,26 @@ Climb the decision ladder from [criticism-and-adaptations.md](references/critici
 4. **Lighter adaptation:** the intent of the pattern with fewer roles.
 5. **Full pattern:** all the roles.
 
-In the map, rung 1 is option C, the best of rungs 2 to 4 is option B, and rung 5 is option A. Before you recommend rung 3, 4 or 5, read the pattern file. Check its "Do not use when" section against the code. Check its "Adaptations" section for the language of the project. In Python, JavaScript, TypeScript, Go, Ruby and Kotlin, a function or a map of functions is usually the default for Strategy, Command and Template Method.
+In the map, rung 1 is option C, the best of rungs 2 to 4 is option B, and rung 5 is option A. Before you recommend rung 3, 4 or 5, read the pattern file. Check its "Do not use when" section against the code. Check its "Adaptations" section for the language of the project.
+
+In Python, JavaScript, TypeScript, Go, Ruby and Kotlin, a function or a map of functions is usually the default for Strategy, Command and Template Method. If the language has no classes (C, Elixir, shell, SQL), option A is the idiomatic full form, for example a struct of function pointers in C or a behaviour in Elixir. If no such form exists, offer only B and C.
 
 ### Phase 4: Present the Refactor Map, then stop
 
-The Refactor Map is the required output of Map mode. Produce it before any edit. Fill every slot.
+The Refactor Map is the required output of Map mode. Produce it before any edit. Fill every slot. Line deltas are estimates: write them with "about".
 
 ````markdown
 ## Refactor Map: <scope>
 
 **Diagnosis:** <one or two sentences: why change is hard here today>
 **Change pressure:** <what the user said, or your assumption marked "to confirm">
+**Constraints:** <limits for all rows: public API, upstream merges in a fork, security rules, deadlines, or "none">
 **Safety net:** <tests that exist> / <characterization tests to add first>
 
-### 1. <hotspot name> (`path/to/file:line`)
+### 1. <hotspot name> (`<path/to/file>:<line>`, or "new" for a component that does not exist yet)
 - **Signal:** <what you saw in the code>
 - **Options:**
-  - **A. Full pattern:** <Pattern> applied here as <short description>. Cost: <new files, approximate line delta, extra indirection>.
+  - **A. Full pattern:** <Pattern> applied here as <short description>. Cost: <new files, about +N lines, extra indirection>.
   - **B. Lighter:** <adaptation>. Cost: <...>.
   - **C. Leave it:** <the condition under which the current code is fine>.
 - **Recommendation:** <A, B or C>, because <reason tied to the change pressure>.
@@ -77,7 +92,7 @@ The Refactor Map is the required output of Map mode. Produce it before any edit.
 ### 2. ...
 
 ### Not touching
-- `<path>`: <signal> needs no pattern, because <reason>.
+- `<path>`: <signal that needs no pattern, or hotspot off the path of the change pressure>, because <reason>. No change in this round.
 
 ### Bugs found
 - `<path:line>`: <behavior>. I will pin it with a test and not fix it, unless you say so. (Write "none" if none.)
@@ -92,7 +107,16 @@ The Refactor Map is the required output of Map mode. Produce it before any edit.
 
 After the map, end your turn. Wait for the choice of the user.
 
-If the user said to work without questions, write the map to `REFACTOR_MAP.md`. Apply only the recommended options. List the open questions at the end of your report.
+When the reply comes:
+
+- If the reply has a choice for each row, apply it.
+- If the reply is partial, or has a choice that is not in the list, restate your reading of each row. A row with no choice is C. Confirm before you edit.
+
+If you run without a user, follow these steps:
+
+1. Write the map to `REFACTOR_MAP.md` and commit it alone.
+2. Apply only recommendations at rungs 1 to 4. A full pattern (rung 5) waits for the confirmation of the user.
+3. List the open questions at the end of your report.
 
 At architecture scale, a row is a seam between modules or services, not a function. Take the options from the "At architecture scale" section of each pattern file. Examples: an anti-corruption layer (Adapter), domain events with an outbox (Observer), a module facade for a strangler migration (Facade).
 
@@ -102,9 +126,11 @@ Follow [refactoring-playbook.md](references/refactoring-playbook.md). For each c
 
 1. Add the characterization tests first if the safety net needs them. Commit them alone.
 2. Follow the "Refactoring path" of the pattern file. Run the tests after each step.
-3. Stop at the "stop point" of the path if it already removes the pain. Tell the user.
-4. Make one commit for each row. Do not mix two patterns in one commit.
+3. If the path reaches its "stop point" and the pain is gone, tell the user. Continue only if the user chose the full form.
+4. Make one or more commits for each row. Do not mix two rows in one commit. Tests for a new seam go in the commit of their row.
 5. Keep the behavior. If you find a bug, pin it with a test, list it, and ask before you fix it.
+
+If the user did not allow commits, stop after each row. Show the diff summary and the test result.
 
 After all rows, report: what changed for each row, the line delta, the test result, and the next wave.
 
@@ -122,7 +148,7 @@ Read only the files that the inventory points to.
 | Adapter | A third-party or legacy interface does not fit your code | [adapter.md](references/adapter.md) |
 | Bridge | Two dimensions vary on their own and subclasses multiply (N x M) | [bridge.md](references/bridge.md) |
 | Composite | Clients treat a tree of items and a single item the same way | [composite.md](references/composite.md) |
-| Decorator | Cross-cutting behavior (retry, cache, logging) wraps a call in combinations | [decorator.md](references/decorator.md) |
+| Decorator | Cross-cutting behavior (retry, logging, timing, metrics) wraps a call in combinations | [decorator.md](references/decorator.md) |
 | Facade | Callers repeat the same sequence of calls into a complex subsystem | [facade.md](references/facade.md) |
 | Flyweight | Memory grows with many objects that share most of their state | [flyweight.md](references/flyweight.md) |
 | Proxy | Access to an object needs lazy loading, caching, access control or a remote hop | [proxy.md](references/proxy.md) |

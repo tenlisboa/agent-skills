@@ -11,8 +11,7 @@ Move the choice of which concrete class to instantiate out of the code that uses
 ## Signals in code
 
 - A class runs one fixed workflow, but one collaborator inside it changes per variant. Search: `grep -nE "new (Csv|Json|Xml)[A-Z]\w*\("`.
-- A `switch` or `if` chain on a type code that only picks a class to instantiate. The rest of the method is the same for all branches.
-- The same type-code `switch` appears in two or more creation sites.
+- A `switch` on a type code that picks a class to instantiate, and is copied in two or more places. One such switch is acceptable (see smells-to-patterns.md).
 - Subclasses exist only to swap one dependency, and they copy the parent method to change one `new` call.
 - A framework or library class hard-codes `new DefaultThing()`, and users ask how to plug in their own `Thing`.
 - Tests patch a module import or a global constructor because the class creates its dependency internally.
@@ -58,18 +57,18 @@ classDiagram
 4. If several types exist, add a temporary parameter or a `switch` inside `createProduct()`. Accept this ugly state for one commit.
 5. Replace Conditional with Polymorphism: create one subclass per branch and override `createProduct()` in each.
 6. Remove the `switch`. Make the base method abstract, or keep one branch as the default.
-7. Move the choice of creator subclass to one place at startup (the composition root).
+7. Move the choice of creator to one place. If the variant is fixed per deployment or per caller, choose at the composition root. If it comes from runtime data (per file, per request), keep one map from type code to creator or factory function.
 
 **Stop point:** after step 3 the creation logic lives in one method. This already gives a test seam. Many teams stop here and inject a factory function instead of subclassing.
 
 ## Adaptations
 
-- **Default for TypeScript/JavaScript and Python:** pass a factory function or a class reference as a constructor parameter. Example: `new StatementImport(() => new CsvParser())`. This keeps the intent with no subclass.
+- **Default for TypeScript/JavaScript and Python:** pass a factory function or a class reference as a constructor parameter. Example: a `StatementImport` variant whose constructor takes `makeParser: () => StatementParser`. This keeps the intent with no subclass.
 - **Functional style:** a higher-order function that takes `makeProduct` and returns the workflow function.
 - **Go:** accept a `func() Product` field in the struct, or accept the interface value directly. Go has no inheritance, so the subclass form does not apply.
 - **Rust:** take a generic `F: Fn() -> Box<dyn Product>` or a trait with an associated constructor.
 - **Java/C#/Kotlin:** the classic subclass form is idiomatic in frameworks. In application code, prefer constructor injection with a `Supplier<T>` or `Func<T>`.
-- **DI containers:** a factory provider (`useFactory` in NestJS, `@Provides` in Dagger) is a Factory Method managed by the container.
+- **DI containers:** a factory provider (`useFactory` in NestJS, `@Provides` in Dagger) is the factory-function form, managed by the container.
 - **React:** a `render` prop or a component prop (`ItemComponent={Row}`) lets the parent decide which component to create.
 
 ## At architecture scale

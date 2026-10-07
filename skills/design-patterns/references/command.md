@@ -22,7 +22,7 @@ Turn a request into a value that holds the operation and all its arguments. Code
 - An operation runs once, right away, from one call site. Call the function.
 - You only need to pass behavior as an argument. Pass a closure or a function reference.
 - You need "undo" for a simple form. Keep the previous value in local state, or use a snapshot (see Memento).
-- The framework already models the request: a route handler, a GraphQL mutation, a Redux action, a message type in your queue library. Use that type as the command. Do not wrap it again.
+- The framework already models the request: a route handler, a GraphQL mutation, a Redux action named as an imperative, a message type in your queue library. Use that type as the command. Do not wrap it again. The Redux style guide prefers event-style actions, which are Observer.
 - You add a command bus with one handler per command and nothing else (no queue, no audit, no undo, no cross-cutting behavior). That is ceremony. Call the service method.
 
 ## Shape
@@ -61,7 +61,7 @@ classDiagram
 3. Change each call site to build that object and pass it to one function. Tests stay green because the function calls the old code.
 4. Stop point: a typed request object and a single handler already give audit logging and one place to add retries. Stop here if you need no queue or undo.
 5. Add an invoker. It runs the handler and adds cross-cutting steps (logging, validation, transactions) in one place.
-6. For deferred work, persist the command object instead of calling the handler. Make handlers idempotent. Include a command ID for deduplication.
+6. This changes behavior: callers lose the immediate result and error. Ask the user, and do it as its own commit. For deferred work, persist the command object instead of calling the handler. Make handlers idempotent. Include a command ID for deduplication.
 7. For undo, add `undo()` or store a memento before `execute()`. Push executed commands onto a history stack. Clear the redo stack after a new command.
 8. Use Replace Conditional with Polymorphism, or a handler map keyed by `type`, to remove the remaining `switch` on action names.
 
@@ -69,10 +69,10 @@ classDiagram
 
 - **Data plus handler map (recommended default):** a discriminated union of command types and a `Record<type, handler>`. Data is easy to serialize, log and test.
 - **Closures:** `() => void` thunks are commands without names. Use them for local deferral. You cannot serialize or audit them.
-- **TypeScript/JavaScript:** Redux actions and reducers, `useReducer`, BullMQ or SQS job payloads. Discriminated unions give exhaustive checks with `never`.
+- **TypeScript/JavaScript:** Redux actions when named as imperatives, `useReducer`, BullMQ or SQS job payloads. The Redux style guide prefers event-style actions, which are Observer. Discriminated unions give exhaustive checks with `never`.
 - **Python:** dataclasses for commands, a dict of handlers. Celery and RQ tasks are commands with a transport.
 - **Go:** a struct per command, and an interface with `Execute(ctx) error`. Use channels of commands for worker pools.
-- **Java/C#/Kotlin:** records or sealed classes for commands. MediatR, Axon and Spring `ApplicationEventPublisher` provide buses. Use one only if you need its pipeline behaviors.
+- **Java/C#/Kotlin:** records or sealed classes for commands. MediatR (requests) and Axon (`CommandGateway`) provide command buses. Use one only if you need its pipeline behaviors.
 - **Rust:** an `enum` of commands and a `match` in the handler. The compiler checks every case.
 
 ## At architecture scale
@@ -125,7 +125,7 @@ const addTrack = (list: Playlist, track: string): Command => ({
   undo: () => { list.tracks.splice(list.tracks.lastIndexOf(track), 1) },
 })
 
-class History {
+class UndoHistory {
   private done: Command[] = []
   private undone: Command[] = []
 

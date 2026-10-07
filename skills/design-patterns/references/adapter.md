@@ -59,8 +59,8 @@ classDiagram
 3. Extract Interface: declare the target interface in the domain module. Use domain names and domain types only.
 4. Create the adapter class. Move the first call and its mapping into it (Move Method).
 5. Inject the adapter through the constructor or the composition root. Do not create it inside business code.
-6. Migrate the remaining call sites one per commit. Delete each local mapping after you migrate it.
-7. Translate vendor errors into domain errors inside the adapter.
+6. Translate vendor errors into domain errors inside the adapter.
+7. Migrate the remaining call sites one per commit. Delete each local mapping after you migrate it.
 8. Add a lint rule that blocks vendor imports outside the adapter folder, for example `no-restricted-imports`.
 
 **Stop point:** after step 5, new code uses the interface and old call sites still work. That partial state has value. You can finish the migration later, file by file.
@@ -81,7 +81,7 @@ Recommend by default: one target interface per capability, implemented by a fact
 - **Ports and adapters (hexagonal):** the domain declares ports. Adapters for HTTP, the database and vendors sit outside and implement them. This is the Adapter pattern applied to every boundary.
 - **Anti-corruption layer (DDD):** a set of adapters and translators that protects your model from a legacy or partner model. Use it when the other model is large, unstable or semantically different.
 - **Integration service or connector:** a separate deployable that translates a partner protocol (SOAP, SFTP files, EDI) into your events or REST API.
-- **Strangler fig migration:** an adapter routes calls to the old or the new system behind one interface while you migrate.
+- **Strangler fig and branch by abstraction:** the adapter translates the new system's interface into the one existing callers use. A routing layer (proxy, gateway or facade, see refactoring-playbook.md) picks old or new per slice.
 
 The architecture form is worth it when the external model changes often, or when more than one team depends on it. It is not worth it for a stable library with a clean API. In that case, a port for each external system adds indirection with no protection.
 
@@ -107,6 +107,8 @@ The architecture form is worth it when the external model changes often, or when
 Often combined with: Facade (adapter behind a facade), Factory Method (select the adapter by configuration), Strategy (adapters as interchangeable providers).
 
 ## Minimal example
+
+The `{ cause }` option of `Error` needs `lib: es2022` or later in `tsconfig.json`.
 
 ```ts
 // Target interface, owned by the domain.

@@ -17,43 +17,54 @@ Use [criticism-and-adaptations.md](criticism-and-adaptations.md) to decide if a 
 
 A hotspot is a file that changes often and is hard to read. Churn multiplied by complexity ranks the work.
 
-Churn per file over the last 12 months:
+Replace `<src-dir>` with the source root of the project (for example `src`, `lib`, `app`).
+On Windows, run these commands in Git Bash or WSL.
+
+Churn per source file over the last 12 months, without tests:
 
 ```bash
-git log --since=12.months --no-merges --format= --name-only \
-  | grep -v '^$' | sort | uniq -c | sort -rn | head -30
+git log --since=12.months --no-merges --format= --name-only -- <src-dir> \
+  | grep -v '^$' | grep -vE '(^|/)(tests?|__tests__|specs?)/|[._](test|spec)\.|(^|/)test_' \
+  | sort | uniq -c | sort -rn | head -30
 ```
 
-Hotspot score (churn times line count) for files that still exist:
+Hotspot score (churn times line count) for source files that still exist, without tests:
 
 ```bash
-git log --since=12.months --no-merges --format= --name-only \
-  | grep -v '^$' | sort | uniq -c | sort -rn | head -100 \
+git log --since=12.months --no-merges --format= --name-only -- <src-dir> \
+  | grep -v '^$' | grep -vE '(^|/)(tests?|__tests__|specs?)/|[._](test|spec)\.|(^|/)test_' \
+  | sort | uniq -c | sort -rn | head -100 \
   | while read -r n f; do
       [ -f "$f" ] && printf '%s\t%s\t%s\n' "$((n * $(wc -l < "$f")))" "$n" "$f"
     done | sort -rn | head -20
 ```
 
-Cyclomatic complexity per function, any language:
+Cyclomatic complexity per function, any language. Ask the user before you install a tool.
 
 ```bash
-pip install lizard
-lizard -C 10 -L 60 --sort cyclomatic_complexity src/ | head -40
+uvx lizard -w -C 10 -L 60 --sort cyclomatic_complexity <src-dir> | head -40
 ```
 
-Type-code switches, which are the main lead for [Strategy](strategy.md) and [State](state.md):
+If `uvx` is not available, use `pipx run lizard` with the same arguments.
+The `-w` flag prints only the functions over the limits (complexity 10, length 60).
+
+Type-code switches, which are the main lead for [Strategy](strategy.md) and [State](state.md).
+The result is a lead, not a measure. Read each match before you act.
 
 ```bash
-grep -rnE --include='*.py' --include='*.js' --include='*.ts' --include='*.java' \
-  --include='*.go' --include='*.rb' --include='*.cs' --include='*.php' \
-  "(switch *\(|case |elif |else if ).*\b(type|kind|status|state|mode)\b" . \
+grep -rniE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist \
+  --exclude-dir=build --exclude-dir=vendor \
+  --include='*.py' --include='*.js' --include='*.mjs' --include='*.cjs' --include='*.jsx' \
+  --include='*.ts' --include='*.tsx' --include='*.java' --include='*.kt' --include='*.go' \
+  --include='*.rb' --include='*.cs' --include='*.php' --include='*.swift' --include='*.rs' \
+  "(switch *\(|case |elif |else if ).*(type|kind|status|state|mode)\b" <src-dir> \
   | cut -d: -f1 | sort | uniq -c | sort -rn | head -20
 ```
 
 Files that change together with a target file (a lead for Shotgun Surgery):
 
 ```bash
-git log --no-merges --format=%H -- path/to/file \
+git log --no-merges --format=%H -- <path/to/file> \
   | xargs -I{} git show --name-only --format= {} \
   | grep -v '^$' | sort | uniq -c | sort -rn | head -15
 ```
@@ -72,7 +83,7 @@ Legacy code often has no tests. Write tests that record what the code does now, 
 6. Check coverage on the hotspot. Add inputs until each branch you will touch runs at least once.
 
 Tools: ApprovalTests (many languages), `syrupy` (Python), Jest or Vitest snapshots (JavaScript), `insta` (Rust), Verify (.NET).
-If an output is wrong today, keep it in the golden master. Fix the bug in a separate commit after the refactor.
+If an output is wrong today, keep it in the golden master. Pin the bug with a test, list it, and ask the user before you fix it.
 
 ## Step 3: Find or make seams
 
@@ -96,7 +107,8 @@ Repeat this loop for each change:
 2. Apply one named refactoring (Extract Method, Move Method, Replace Conditional with Polymorphism).
 3. Run the tests.
 4. Commit with the refactoring name in the message, for example "Extract Method: computeShipping".
-5. If the tests fail, revert with `git restore .` or `git reset --hard` and take a smaller step.
+5. If the tests fail, take a smaller step. Revert only the files of this step: `git restore -- <files>`.
+   Do not run `git reset --hard` without the consent of the user.
 
 Each commit must build and pass. Then you can bisect, revert or stop at any commit.
 
@@ -156,16 +168,16 @@ Record a baseline before the first commit. Measure again after the refactor and 
 
 | Metric | How to measure | Good result |
 |---|---|---|
-| Files touched per typical change | Median of files per commit in the area over the last 20 commits | Goes down |
+| Files touched per typical change | Median of all files per commit, over the last 20 commits that touch the area | Goes down |
 | Cyclomatic complexity | `lizard` average and maximum for the hotspot | Maximum goes down |
 | Lines in the hotspot file | `wc -l` | Goes down or spreads to cohesive files |
 | Test run time | `time <test command>` | Same or faster |
 | Lead time of the next feature | Time from first commit to merge | Goes down |
 
-Median files per commit for a path:
+Median files per commit for an area. The `--full-diff` flag counts all files of each commit, not only the files in `<area-dir>`.
 
 ```bash
-git log --no-merges -n 20 --format='tformat:@' --name-only -- src/area/ \
+git log --no-merges --full-diff -n 20 --format='tformat:@' --name-only -- <area-dir> \
   | awk '/^@/{if(c)print c; c=0; next} NF{c++} END{if(c)print c}' \
   | sort -n | awk '{a[NR]=$1} END{print "median files per commit:", a[int((NR+1)/2)]}'
 ```

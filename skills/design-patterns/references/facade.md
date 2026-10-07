@@ -55,7 +55,7 @@ classDiagram
 2. Write an integration or contract test for the workflow at one call site.
 3. Extract Function: move the sequence from that call site into a new module with a task-level name.
 4. Turn the variations into parameters (Parameterize Method) or into two methods with clear names.
-5. Replace the sequence at the other call sites with a call to the new function. Do one call site per commit.
+5. Replace the sequence at the other call sites with a call to the new function. Do one call site per commit. Add a characterization test at each call site before you replace it.
 6. When the function needs shared setup or clients, promote it to a class with the dependencies injected.
 7. Keep the facade free of new rules. Move any rule you find into the domain or the subsystem.
 8. If the facade grows past about seven methods, split it by task area into additional facades.
@@ -77,6 +77,7 @@ classDiagram
 - **Backend for frontend (BFF):** one facade per client type. It combines calls to several services into the shape that one screen needs.
 - **Module public API in a modular monolith:** each module exposes one entry file. Other modules must not import internals. Enforce it with lint rules or tools such as `dependency-cruiser`.
 - **Platform SDK or internal client library:** one package that hides service discovery, auth and retries.
+- **Strangler fig entry point:** a module facade in front of a legacy subsystem. Callers move to the facade first. Then each facade method switches, one at a time, to the new implementation (see refactoring-playbook.md).
 - **Orchestrating service:** a service that runs a workflow across several services. Treat it as a facade only if it holds no domain rules of its own.
 
 The gateway or BFF is worth it when several clients call several services and the call patterns differ per client. It is not worth it for one client and one service. In that case, the gateway is an extra hop with no gain.
@@ -92,6 +93,7 @@ The gateway or BFF is worth it when several clients call several services and th
 - A facade can grow into a god object coupled to everything.
 - It can hide features that some clients need, and they start to bypass it.
 - A gateway or BFF adds a network hop, a deployable and an owner.
+- A facade over remote services is not atomic. Decide what happens when step 2 of 4 fails: retry, compensate, or show a partial state.
 
 ## Neighbors
 

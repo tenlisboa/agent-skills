@@ -22,7 +22,7 @@ Let an object change its behavior when its internal mode changes, without a mode
 - There are two or three modes and only one method depends on them. A `switch` is clearer.
 - Behavior per mode differs only in which transitions are allowed. Use a transition table: a map from `(state, event)` to the next state and an optional side effect.
 - The machine is large, nested, has timers or parallel regions, or needs a diagram for product people. Use a state-machine library (XState in TS, `transitions` in Python, Spring Statemachine in Java).
-- The status lives in a database and many services change it. Enforce transitions in one place, such as a domain service or a database constraint. Per-state classes in one process do not protect the data.
+- The status lives in a database and many services change it. Enforce transitions in one place: a domain service that writes with a conditional update (`UPDATE ... SET status = 'shipped' WHERE id = ? AND status = 'paid'`, then check the row count), or a trigger. Per-state classes in one process do not protect the data.
 - The "states" are really configuration that never changes at runtime. That is Strategy or plain config.
 
 ## Shape
@@ -56,10 +56,10 @@ classDiagram
 3. Replace the raw string or number with a union type or enum. Centralize all writes to the field in one `transition(event)` method.
 4. Stop point: put the allowed transitions in a table that `transition` reads. Many codebases need nothing more. Stop here if behavior per state is mostly the same.
 5. If several methods still `switch` on the mode, apply Replace Type Code with State. Declare a state interface with only the mode-dependent methods.
-6. Create one class per mode. Use Move Method to move each branch into its class.
-7. Give the context a `transitionTo` method. Let states call it, or let them return the next state. Returning the next state is easier to test.
-8. Replace the `switch` blocks in the context with calls to the current state.
-9. Persist the mode as a plain value. Rebuild the state object on load with a factory from that value.
+6. If the entity is persisted, keep the stored column a plain value and add a factory `fromStatus(value)` now, before the classes replace the field.
+7. Create one class per mode. Use Move Method to move each branch into its class.
+8. Give the context a `transitionTo` method. Let states call it, or let them return the next state. Returning the next state is easier to test.
+9. Replace the `switch` blocks in the context with calls to the current state.
 
 ## Adaptations
 

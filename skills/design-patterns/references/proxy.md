@@ -55,16 +55,16 @@ classDiagram
 
 ## Refactoring path
 
-1. Pick one control concern: lazy creation, cache, access check or remote call. Do one per proxy.
+1. Pick one control concern: lazy creation, cache, access check or remote call. Start with one concern per proxy. Combine only lazy creation with caching.
 2. Extract Interface from the real class if clients depend on the concrete class.
-3. If you cannot extract an interface, subclass the real class as a fallback. Document why.
+3. If you cannot extract an interface, subclass the real class as a fallback. Document why. If the class is final, wrap it behind a new interface (Adapter-style) instead. In TypeScript, a proxy can `implements RealClass` directly when the class has no private members.
 4. Create the proxy class. Implement every method as a plain delegation first. Run the tests.
-5. Move the control logic from the callers into the proxy, one caller per commit. Delete each local copy.
-6. Wire the proxy in the composition root or a factory. Clients receive Subject and never `new` the real class.
+5. Wire the pass-through proxy in the composition root or a factory. Clients receive Subject.
+6. Move the control logic from the callers into the proxy, one caller per commit. Delete each local copy.
 7. For caches, define the key, the expiry and the invalidation rule in writing before you ship.
 8. Add tests for the proxy itself: miss, hit, expiry, denied access or failed lazy creation.
 
-**Stop point:** after step 4, the seam exists and does nothing harmful. You can add control logic later, one concern at a time.
+**Stop point:** after step 5, the seam exists and does nothing harmful. You can add control logic later, one concern at a time.
 
 ## Adaptations
 
@@ -82,7 +82,7 @@ classDiagram
 - **CDN and HTTP caches:** a caching proxy at the network edge, controlled by `Cache-Control` headers.
 - **Sidecar proxy:** a service mesh sidecar intercepts all traffic of one service to add mTLS, retries and access policy.
 - **Remote proxies:** RPC stubs and SDK clients make a remote service look local. Watch for hidden latency and partial failure.
-- **ORM lazy loading:** a related entity is a proxy that queries the database on first access. This causes the N+1 query problem. Check the query count in tests.
+- **ORM lazy loading:** a related entity is a proxy that queries the database on first access. This can cause the N+1 query problem. Check the query count in tests.
 - **Auth gateway or policy enforcement point:** a protection proxy for a group of services.
 
 The infrastructure form is worth it when several services need the same control. Use off-the-shelf proxies there instead of custom code. Keep an in-code proxy when the control needs domain knowledge, such as a cache key built from business fields.
@@ -127,17 +127,22 @@ class FxApiClient implements FxRates {
 // Caching and lazy proxy: same interface, controls access to the real client.
 class CachedFxRates implements FxRates {
   private real?: FxRates;
-  private cache = new Map<string, { value: number; expires: number }>();
+  private cache = new Map<string, { value: Promise<number>; expires: number }>();
 
   constructor(private create: () => FxRates, private ttlMs = 60_000) {}
 
-  async rate(from: string, to: string): Promise<number> {
+  rate(from: string, to: string): Promise<number> {
     const key = `${from}:${to}`;
     const hit = this.cache.get(key);
     if (hit && hit.expires > Date.now()) return hit.value;
     this.real ??= this.create(); // created only on first miss
-    const value = await this.real.rate(from, to);
-    this.cache.set(key, { value, expires: Date.now() + this.ttlMs });
+    // Cache the promise before it settles, so concurrent misses share one call.
+    const value = this.real.rate(from, to);
+    const entry = { value, expires: Date.now() + this.ttlMs };
+    this.cache.set(key, entry);
+    value.catch(() => {
+      if (this.cache.get(key) === entry) this.cache.delete(key);
+    });
     return value;
   }
 }

@@ -35,7 +35,7 @@ Split one class hierarchy that varies along two independent axes into two hierar
 
 ```mermaid
 classDiagram
-  class Document {
+  class Report {
     <<abstract>>
     #out: Renderer
     +export() string
@@ -48,12 +48,12 @@ classDiagram
     +row(cells)
     +finish() string
   }
-  class PdfRenderer
+  class HtmlRenderer
   class CsvRenderer
-  Document <|-- Invoice
-  Document <|-- Statement
-  Document o-- Renderer
-  Renderer <|.. PdfRenderer
+  Report <|-- Invoice
+  Report <|-- Statement
+  Report o-- Renderer
+  Renderer <|.. HtmlRenderer
   Renderer <|.. CsvRenderer
 ```
 
@@ -77,7 +77,7 @@ classDiagram
 - **Functional style:** the abstraction is a higher-order function that receives an object of primitive functions. For example, `exportInvoice(invoice, renderer)`.
 - **Python:** a `Protocol` for the implementor and plain functions or classes for the abstraction.
 - **Go:** an interface field in a struct. This is idiomatic Go and needs no pattern name.
-- **Rust:** a generic parameter `Document<R: Renderer>` for static dispatch, or `Box<dyn Renderer>` for runtime choice.
+- **Rust:** a generic parameter `Report<R: Renderer>` for static dispatch, or `Box<dyn Renderer>` for runtime choice.
 - **Java/C#/Kotlin:** inject the implementor through the DI container. Register one implementor per environment or tenant.
 
 Recommend by default: an injected interface on the low-level axis, and a function or one class on the high-level axis.
@@ -85,7 +85,7 @@ Recommend by default: an injected interface on the low-level axis, and a functio
 ## At architecture scale
 
 - **Driver or provider model:** an application API calls a driver interface. JDBC, database ORMs with dialects, and logging back ends follow this shape.
-- **Ports and adapters:** the domain service is the abstraction and the infrastructure adapters are the implementors. Hexagonal architecture is a bridge at the service boundary.
+- **Ports and adapters:** when one domain service has several variants and each port has several adapters, the port is a bridge between two axes. Most hexagonal code has one domain side and is plain Adapter. See adapter.md.
 - **Cross-platform clients:** shared UI or business logic on top of a per-platform layer for storage, push messages or file access.
 - **Multi-cloud or multi-vendor platforms:** a platform API over provider modules, for example Terraform providers.
 
@@ -121,33 +121,42 @@ interface Renderer {
   row(cells: string[]): void;
   finish(): string;
 }
-
 class CsvRenderer implements Renderer {
   private lines: string[] = [];
   heading(text: string) { this.lines.push(`# ${text}`); }
   row(cells: string[]) { this.lines.push(cells.join(",")); }
-  finish() { return this.lines.join("\n"); }
+  finish() { return this.lines.splice(0).join("\n"); }
+}
+class HtmlRenderer implements Renderer {
+  private parts: string[] = [];
+  heading(text: string) { this.parts.push(`<h1>${text}</h1>`); }
+  row(cells: string[]) { this.parts.push(`<p>${cells.join(" | ")}</p>`); }
+  finish() { return this.parts.splice(0).join(""); }
 }
 
-// Abstraction: high-level document logic, unaware of the format.
-abstract class Document {
-  constructor(protected readonly out: Renderer) {}
+const money = (cents: number) => (cents / 100).toFixed(2);
+// Abstraction: high-level report logic, unaware of the format.
+abstract class Report {
+  constructor(protected readonly out: Renderer, protected readonly lines: { label: string; cents: number }[]) {}
   abstract export(): string;
 }
-
-class Invoice extends Document {
-  constructor(out: Renderer, private items: { sku: string; cents: number }[]) {
-    super(out);
-  }
+class Invoice extends Report {
   export() {
     this.out.heading("Invoice");
-    this.items.forEach((i) => this.out.row([i.sku, (i.cents / 100).toFixed(2)]));
-    const total = this.items.reduce((s, i) => s + i.cents, 0);
-    this.out.row(["TOTAL", (total / 100).toFixed(2)]);
+    this.lines.forEach((l) => this.out.row([l.label, money(l.cents)]));
+    this.out.row(["TOTAL", money(this.lines.reduce((s, l) => s + l.cents, 0))]);
     return this.out.finish();
   }
 }
-
-// Client connects one abstraction to one implementor.
-const csv = new Invoice(new CsvRenderer(), [{ sku: "A-1", cents: 1250 }]).export();
+class Statement extends Report {
+  export() {
+    this.out.heading("Statement");
+    let balance = 0;
+    this.lines.forEach((l) => this.out.row([l.label, money((balance += l.cents))]));
+    return this.out.finish();
+  }
+}
+// 2 reports + 2 renderers = 4 classes for 4 combinations. A third renderer adds 1 class, not 2.
+const html = new Statement(new HtmlRenderer(), [{ label: "fee", cents: -250 }]).export();
+const csv = new Invoice(new CsvRenderer(), [{ label: "A-1", cents: 1250 }]).export();
 ```

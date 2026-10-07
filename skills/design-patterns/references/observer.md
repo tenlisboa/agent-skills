@@ -55,8 +55,8 @@ classDiagram
 3. Use Extract Method so each follow-up becomes a function that takes only the event.
 4. Stop point: the core method builds the event and calls the extracted handlers in a fixed list. This keeps order and errors explicit. Many teams should stop here.
 5. Introduce a small typed emitter, or reuse the one the platform provides. Register the handlers at startup in one composition file.
-6. Replace the fixed list with `emit(event)`. Keep the registration file as the single place that shows who listens.
-7. Decide the failure policy. Catch and log per handler, or fail the whole emit. Write a test for it.
+6. Pin the current failure behavior with a test (today a failing follow-up throws to the caller). Keep that policy in the emitter, or ask the user before you change it.
+7. Replace the fixed list with `emit(event)`. Keep the registration file as the single place that shows who listens.
 8. Return an unsubscribe function from `subscribe`. Call it on teardown in components, tests and long-lived workers.
 9. Move slow or remote handlers out of process (queue, outbox) only when latency or reliability demands it.
 
@@ -103,6 +103,10 @@ Often combined with: Mediator (hub implemented with events), State (emit on each
 ## Minimal example
 
 ```typescript
+declare const receipts: { send(invoiceId: string): Promise<void> };
+declare const searchIndex: { update(invoiceId: string): Promise<void> };
+declare const db: { invoices: { update(id: string, patch: { status: string }): Promise<void> } };
+
 type InvoicePaid = { invoiceId: string; amountCents: number; paidAt: Date };
 type Listener<E> = (event: E) => void | Promise<void>;
 
@@ -117,7 +121,7 @@ class Topic<E> {
   async emit(event: E): Promise<void> {
     for (const fn of [...this.listeners]) {
       try { await fn(event); }
-      catch (err) { console.error("listener failed", err); } // one failure does not stop the rest
+      catch (err) { console.error("listener failed", err); } // chosen policy: one failure does not stop the rest
     }
   }
 }
@@ -126,9 +130,10 @@ export const invoicePaid = new Topic<InvoicePaid>();
 
 // composition root: the one place that shows who reacts
 invoicePaid.subscribe((e) => receipts.send(e.invoiceId));
-invoicePaid.subscribe((e) => ledger.record(e.invoiceId, e.amountCents));
+invoicePaid.subscribe((e) => searchIndex.update(e.invoiceId));
+// Financial writes (ledger entries) belong in the same transaction or an outbox, not in a best-effort listener.
 
-// billing service: knows nothing about receipts or the ledger
+// billing service: knows nothing about receipts or the search index
 export async function markPaid(invoiceId: string, amountCents: number) {
   await db.invoices.update(invoiceId, { status: "paid" });
   await invoicePaid.emit({ invoiceId, amountCents, paidAt: new Date() });

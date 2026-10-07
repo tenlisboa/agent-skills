@@ -21,7 +21,7 @@ Fix the order of steps in an algorithm in one place, and let variants supply onl
 - There are two copies and they rarely change. Accept the duplication, or extract the shared steps into helper functions.
 - The variants differ in which steps run or in their order, not only in step content. Write each flow explicitly, or build a pipeline of step functions.
 - The class already extends another base. Inheritance is a single slot. Pass the varying steps as functions instead.
-- The varying step must change at runtime or per call. Use Strategy or a function parameter.
+- The variant replaces the whole algorithm, not a few steps inside a skeleton that shared code owns. Use Strategy.
 - The framework already gives lifecycle hooks (test `beforeEach`, middleware, ORM callbacks, React effects). Use them instead of a custom base class.
 
 ## Shape
@@ -63,8 +63,8 @@ classDiagram
 - **TypeScript:** no `final` keyword. Use a function with a hooks object, or document the rule and test it.
 - **Python:** `abc.ABC` with `@abstractmethod`. Prefer passing callables for new code.
 - **Go:** no inheritance. Use a function that takes an interface of steps.
-- **Rust:** a trait with required methods and default methods. The provided method acts as the template.
-- **Java, C#, Kotlin:** abstract class with a `final` or non-virtual template method. Kotlin classes are final by default, which helps.
+- **Rust:** a trait with required methods and default methods. The provided method acts as the template. Rust cannot forbid overriding a provided method. Document it.
+- **Java, C#, Kotlin:** abstract class with a `final` or non-virtual template method. Kotlin members are final by default, so the template method cannot be overridden unless marked `open`.
 - **Frameworks:** lifecycle hooks, middleware chains and test fixtures already apply this idea. Plug into them.
 
 ## At architecture scale
@@ -89,7 +89,7 @@ classDiagram
 
 ## Neighbors
 
-- **Strategy**: varies a whole algorithm through composition at runtime. Ask: does the variant need to change per call or per instance?
+- **Strategy**: the variant replaces the whole algorithm, and no shared skeleton stays around it. Ask: is there a fixed sequence that must stay in one place?
 - **Factory Method**: a special template step that creates an object. Ask: is the varying step only "which object to create"?
 - **Chain of Responsibility / middleware**: steps are a list that can change. Ask: is the order of steps fixed, or configurable?
 - **Decorator**: wraps behavior before and after. Ask: do you add work around a call, or fill a gap inside a flow?
@@ -99,6 +99,10 @@ Often combined with: Factory Method (as one step), Strategy (steps passed as obj
 ## Minimal example
 
 ```typescript
+declare function sign(body: string): string;
+declare function safeEqual(a: string, b: string): boolean; // crypto.timingSafeEqual
+declare const shipments: { updateStatus(id: string, status: string): Promise<void> };
+
 // The fixed flow for every inbound webhook provider.
 interface WebhookSteps<E> {
   verify(rawBody: string, headers: Headers): boolean;
@@ -121,7 +125,7 @@ async function processWebhook<E>(
 
 // One provider only supplies what differs.
 const shippingCarrier: WebhookSteps<{ trackingId: string; status: string }> = {
-  verify: (body, h) => h.get("x-carrier-signature") === sign(body),
+  verify: (body, h) => safeEqual(h.get("x-carrier-signature") ?? "", sign(body)),
   parse: (body) => JSON.parse(body),
   handle: (e) => shipments.updateStatus(e.trackingId, e.status),
 };

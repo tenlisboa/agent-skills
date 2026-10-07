@@ -1,7 +1,7 @@
 # Flyweight
 
 **Category:** Structural
-**Also known as:** Intern pool, Shared value cache
+**Also known as:** Cache
 **Source:** https://refactoring.guru/design-patterns/flyweight
 
 ## Intent
@@ -19,7 +19,7 @@ Cut memory use when a program holds very many similar objects. Store the heavy, 
 ## Do not use when
 
 - No profiler shows a memory problem. Flyweight is an optimization, not a design goal. Measure first.
-- The object count is in the thousands, not the millions. The saving is too small to matter. Keep plain objects.
+- Object count times intrinsic bytes is small next to the heap. Compute it before you refactor.
 - The shared part must change per object. Shared mutable state causes bugs that are hard to find. Keep one object per item.
 - Streaming solves it. Process records one at a time instead of holding them all in memory.
 - A columnar layout or typed arrays solve it better. Store fields as arrays of numbers instead of objects.
@@ -65,13 +65,13 @@ classDiagram
 7. Change the creation sites to call the factory. Keep the extrinsic fields in the original class, which becomes the context.
 8. Measure again with the same input. Keep the change only if it meets the target.
 
-**Stop point:** after step 3, the shared data is immutable. Often a simple cache lookup at creation time then gives most of the saving, without the full split.
+**Stop point:** after step 4 plus a factory lookup on the extracted intrinsic object (steps 6-7). Skip step 5 when the shared methods do not need extrinsic state. This gives most of the saving without changing method signatures.
 
 ## Adaptations
 
 - **TypeScript/JavaScript (default):** a `Map<string, Readonly<T>>` cache plus `Object.freeze`. Keep the context as a plain object with a reference to the shared value. No classes are needed.
 - **Typed arrays and struct-of-arrays:** store the per-object numbers in `Float32Array` or `Int32Array` columns and the shared data in a small lookup table by index. This often saves more than Flyweight does.
-- **Python:** `__slots__` on the context class, `sys.intern` for repeated strings, and `functools.lru_cache` on a factory function. `enum` members are flyweights already.
+- **Python:** `__slots__` on the context class, `sys.intern` for repeated strings, and `functools.cache` on a factory function. Do not use `lru_cache` there, because eviction breaks identity. `enum` members are flyweights already.
 - **Java/C#:** `String.intern`, `Integer.valueOf` caching and `record` types for immutable shared values.
 - **Rust:** `Rc<T>` or `Arc<T>` for shared immutable data, or an index into a `Vec` arena.
 - **Game and simulation code:** an entity-component system stores component data in dense arrays. Use it instead of per-object flyweights.
@@ -107,7 +107,7 @@ The architecture form is worth it when storage or memory cost is a measured prob
 - **Composite**: shared leaves in a large tree can be flyweights. Ask: do many leaves hold the same state?
 - **Proxy (caching)**: a caching proxy stores results per request, while a flyweight factory stores shared state objects. Ask: are you caching answers or caching the objects themselves?
 
-Often combined with: Factory Method (the flyweight factory), Composite (shared leaves), State or Strategy objects without fields (share one instance).
+Often combined with: a factory function or registry (the flyweight factory), Composite (shared leaves), State or Strategy objects without fields (share one instance).
 
 ## Minimal example
 
@@ -116,7 +116,8 @@ type StyleSpec = { font: string; bold: boolean; numberFormat: "int" | "money" };
 
 // Flyweight: shared, immutable, takes extrinsic state as a parameter.
 class CellStyle {
-  constructor(readonly spec: Readonly<StyleSpec>) { Object.freeze(this); }
+  readonly spec: Readonly<StyleSpec>;
+  constructor(spec: StyleSpec) { this.spec = Object.freeze({ ...spec }); Object.freeze(this); }
   render(value: number): string {
     const text = this.spec.numberFormat === "money" ? value.toFixed(2) : String(Math.round(value));
     return this.spec.bold ? `**${text}**` : text;

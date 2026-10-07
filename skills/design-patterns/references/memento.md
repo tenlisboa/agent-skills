@@ -60,7 +60,7 @@ classDiagram
 2. Move Method. Put a `save()` method on the owner that returns a copy of its state as one value.
 3. Add `restore(snapshot)` on the owner. Replace the external field-by-field revert with this call.
 4. Stop point: a `save`/`restore` pair with a plain copy already fixes the encapsulation leak. Many codebases need no more.
-5. Make the snapshot opaque. Use a branded type, a private class, or a closure so callers cannot read the fields.
+5. Make the snapshot opaque. Keep its state in a closure, in `#private` fields, or in a private class. A branded type alone gives nominal typing but does not hide fields.
 6. Remove the setters and public fields that existed only for the old undo logic.
 7. Add a caretaker (history stack, checkpoint store) when more than one caller needs the restore points.
 8. Bound the history. Set a maximum depth or memory budget and drop the oldest snapshots.
@@ -69,18 +69,18 @@ classDiagram
 
 - **Immutable state plus references (recommended default for TS/JS UI):** if updates create new objects, the previous object is the memento. Keep an array of past states. Immer patches give cheap diffs.
 - **Closure as memento:** `save()` returns `() => void` that restores the captured state. The caller cannot read the state, so encapsulation holds without a class.
-- **TypeScript:** use a branded type or an `#private` class field to make the memento opaque. `structuredClone` gives a deep copy of plain data.
+- **TypeScript:** use a branded type for nominal typing, and keep the state inside the originator (a `#private` WeakMap keyed by the snapshot) or in a closure. A brand alone does not hide fields. `structuredClone` gives a deep copy of plain data.
 - **Optimistic UI:** save the cache entry before the mutation and restore it on error. TanStack Query (`onMutate` returns context, `onError` restores) and Apollo optimistic responses are built-in forms.
 - **Python:** `copy.deepcopy` or a frozen dataclass. Use `__getstate__` and `__setstate__` to control what the snapshot holds.
-- **Go:** return an unexported struct type from `Snapshot()`. Other packages can hold it but cannot read its fields.
+- **Go:** an exported type with unexported fields (`type Snapshot struct{ seats []string }`). Other packages can store it in fields and slices but cannot read or build its content.
 - **Rust:** `#[derive(Clone)]` on the state struct and a private field in a newtype for opacity.
-- **Java/C#/Kotlin:** a nested private class or a record inside the originator. Kotlin `data class` with `copy()` gives cheap snapshots.
+- **Java/C#/Kotlin:** a public marker interface `Memento` (metadata only) implemented by a private nested class of the originator. A public record is not opaque, because its accessors are public. Kotlin `data class` with `copy()` gives cheap snapshots.
 
 ## At architecture scale
 
 - **Event sourcing with snapshots:** the event log is the full history. Periodic snapshots are mementos that make rebuild fast. Worth it when you need audit and time travel. Not worth it for simple CRUD.
 - **Checkpoints in batch and stream jobs:** Flink, Spark and Kafka consumer offsets save progress. A crashed job restarts from the last checkpoint.
-- **Saga compensation:** each step records what it needs to undo itself. That record is a memento across services.
+- **Saga compensation:** each step records the data its compensating action needs. That is Command-style undo (an inverse), not a state restore. See Command.
 - **Infrastructure snapshots:** database backups, volume snapshots and VM images. Same idea, at a different scale and cost.
 - **Session and draft storage:** save a serialized memento of a wizard or editor so the user resumes on another device. Version the format.
 - Caution: a serialized memento is a contract. Old snapshots must still load after a schema change. Add a version field and a migration.
@@ -96,7 +96,7 @@ classDiagram
 - Memory use grows with snapshot size and frequency.
 - Deep copies are slow for large graphs, and shallow copies share mutable parts by accident.
 - Caretakers must drop old snapshots, or memory leaks.
-- In JS and Python, opacity is a convention unless you use closures or private fields.
+- In JS, opacity needs closures or `#private` fields. In Python, it is always a convention.
 - Persisted snapshots need versioning and migration.
 
 ## Neighbors

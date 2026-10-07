@@ -1,7 +1,7 @@
 # Visitor
 
 **Category:** Behavioral
-**Also known as:** Double Dispatch
+**Also known as:** none (uses double dispatch)
 **Source:** https://refactoring.guru/design-patterns/visitor
 
 ## Intent
@@ -19,7 +19,7 @@ Add new operations over a fixed set of node types without editing those types ea
 
 ## Do not use when
 
-- The language has discriminated unions or pattern matching with exhaustiveness checks. Use a `switch` or `match` over a union. This covers TypeScript, Rust, Kotlin sealed classes, Scala, Swift, Java 21 sealed types and Python 3.10 `match`.
+- The language has discriminated unions or pattern matching with exhaustiveness checks. Use a `switch` or `match` over a union. This covers TypeScript, Rust, Kotlin sealed classes, Scala, Swift, Java 17+ sealed types with Java 21 pattern `switch`, and Python 3.10 `match` (no exhaustiveness, use pyright or mypy with `assert_never`).
 - Node types change more often than operations. Visitor makes each new node type a change to every visitor. Keep methods on the nodes.
 - There are one or two operations. Put them on the nodes, or write one function with a `switch`.
 - The structure is homogeneous (one node type with a `kind` field). A map from `kind` to handler is enough.
@@ -66,9 +66,9 @@ classDiagram
 
 - **Default for TypeScript:** a discriminated union and a `switch` on `kind`, with a `default` that assigns to `never`. Each operation is one function.
 - **Rust:** `enum` plus `match`. Exhaustive by default.
-- **Kotlin, Java 21+:** sealed interfaces plus `when` or `switch` pattern matching. The compiler checks completeness.
+- **Kotlin, Java:** Kotlin sealed interfaces plus `when`, or Java 17+ sealed types with Java 21 pattern `switch`. The compiler checks completeness.
 - **Python 3.10+:** `match` with class patterns. Exhaustiveness is not enforced, so add a final `case _: raise` and test each type.
-- **Classic Visitor still fits:** Java before 17, C#, C++, or an open class hierarchy across packages where unions are not possible.
+- **Classic Visitor still fits:** Java before 21, C# and C++ without closed hierarchies, or a node set that is closed and owned by one package while third parties add operations. If third parties add node types, neither Visitor nor unions fit. Keep methods on the nodes.
 - **Generic visitor return types:** use `Visitor<R>` so each operation returns its own result type, instead of a mutable accumulator.
 - **Library visitors:** compiler and linter toolkits supply walkers. Override only the node methods you need.
 
@@ -110,33 +110,57 @@ Often combined with: Composite (the visited tree), Iterator (the traversal), Int
 ## Minimal example
 
 ```typescript
-// Classic double dispatch over a small search-filter tree.
-interface FilterVisitor<R> {
-  field(n: FieldEq): R;
-  all(n: AllOf): R;
-}
-interface Filter { accept<R>(v: FilterVisitor<R>): R; }
+// Default in TypeScript: a discriminated union and one function per operation.
+type Filter =
+  | { kind: "field"; name: string; value: string }
+  | { kind: "all"; parts: Filter[] }
+  | { kind: "not"; inner: Filter };
 
-class FieldEq implements Filter {
+// illustration only: real code emits a parameterized query and allows only known column names
+function toSql(f: Filter): string {
+  switch (f.kind) {
+    case "field": return `${f.name} = '${f.value.replace(/'/g, "''")}'`;
+    case "all": return f.parts.map(toSql).join(" AND ");
+    case "not": return `NOT (${toSql(f.inner)})`;
+    default: { const _x: never = f; return _x; }
+  }
+}
+
+function matches(f: Filter, row: Record<string, string>): boolean {
+  switch (f.kind) {
+    case "field": return row[f.name] === f.value;
+    case "all": return f.parts.every((p) => matches(p, row));
+    case "not": return !matches(f.inner, row);
+    default: { const _x: never = f; return _x; }
+  }
+}
+
+const f: Filter = { kind: "all", parts: [
+  { kind: "field", name: "city", value: "Lisbon" },
+  { kind: "not", inner: { kind: "field", name: "tier", value: "gold" } },
+] };
+toSql(f); // city = 'Lisbon' AND NOT (tier = 'gold')
+matches(f, { city: "Lisbon", tier: "silver" }); // true
+```
+
+**Classic double dispatch (when nodes are classes you cannot turn into a union):**
+
+```typescript
+interface FilterVisitor<R> { field(n: FieldEq): R; all(n: AllOf): R }
+interface FilterNode { accept<R>(v: FilterVisitor<R>): R }
+
+class FieldEq implements FilterNode {
   constructor(readonly name: string, readonly value: string) {}
   accept<R>(v: FilterVisitor<R>) { return v.field(this); }
 }
-class AllOf implements Filter {
-  constructor(readonly parts: Filter[]) {}
+class AllOf implements FilterNode {
+  constructor(readonly parts: FilterNode[]) {}
   accept<R>(v: FilterVisitor<R>) { return v.all(this); }
 }
 
-// Each operation lives in one object. Node classes stay untouched.
-const toSql: FilterVisitor<string> = {
-  field: (n) => `${n.name} = '${n.value.replace(/'/g, "''")}'`,
-  all: (n) => n.parts.map((p) => p.accept(toSql)).join(" AND "),
-};
+// One operation in one object. The node classes stay untouched.
 const matches = (row: Record<string, string>): FilterVisitor<boolean> => ({
   field: (n) => row[n.name] === n.value,
   all: (n) => n.parts.every((p) => p.accept(matches(row))),
 });
-
-const f = new AllOf([new FieldEq("city", "Lisbon"), new FieldEq("tier", "gold")]);
-f.accept(toSql); // city = 'Lisbon' AND tier = 'gold'
-f.accept(matches({ city: "Lisbon", tier: "gold" })); // true
 ```

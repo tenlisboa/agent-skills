@@ -68,7 +68,7 @@ classDiagram
 - **Typed event channel:** an event emitter with a typed event map. The mediator subscribes and reacts. This mixes Mediator with Observer and is common in TS/JS.
 - **Python:** a coordinator function or class that peers call. Django signals or `blinker` give the channel, but keep the rules in one module.
 - **Go:** a coordinator struct with methods, or a goroutine that reads events from a channel and calls peers.
-- **Java/C#/Kotlin:** MediatR (C#) or Spring events give the plumbing. Keep one handler class per use case so rules stay in one place.
+- **Java/C#/Kotlin:** a coordinator class per use case that peers receive through the constructor. MediatR is a request dispatcher (see Command), not a colleague coordinator. Spring events give an event channel (see Observer).
 - **Functional:** a reducer is a mediator for state. Events go in, the new state comes out, and views read derived values.
 
 ## At architecture scale

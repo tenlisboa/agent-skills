@@ -64,7 +64,7 @@ classDiagram
 - **Default for TypeScript/JavaScript:** for data objects, use `structuredClone()` plus a spread for overrides. Write a `clone()` method only for class instances with private state or methods, because `structuredClone` drops the prototype chain.
 - **Python:** `copy.deepcopy()` with `__deepcopy__` overrides for fields that need custom handling. For dataclasses, `dataclasses.replace()` gives shallow copies with overrides.
 - **Go:** write a `Clone()` method by hand. Copy slices and maps explicitly, because assignment shares them.
-- **Rust:** `#[derive(Clone)]` is the language-native Prototype. Ownership rules make deep copies explicit.
+- **Rust:** `#[derive(Clone)]` covers concrete types. To clone through a trait object, add `fn clone_box(&self) -> Box<dyn Trait>` to the trait or use the `dyn-clone` crate, because `Clone` is not dyn-compatible.
 - **Java/C#/Kotlin:** prefer a copy constructor or a `copy()` method over `Object.clone()` in Java. Kotlin data classes provide `copy(field = x)`. C# records provide `with` expressions.
 - **Prototype-based languages:** JavaScript objects can use `Object.create(proto)` for shared defaults. This shares state, so it is not a copy. Do not confuse the two.
 

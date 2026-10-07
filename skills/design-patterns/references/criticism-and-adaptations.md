@@ -32,7 +32,7 @@ Speculative Generality and Lazy Class in [smells-to-patterns.md](smells-to-patte
 | First-class functions, lambdas | [Strategy](strategy.md), [Command](command.md), [Template Method](template-method.md) | Each variant has several methods or its own state |
 | Closures | [Command](command.md) | You need undo, serialization, or a queue that outlives the process |
 | Generators, `yield`, lazy sequences | [Iterator](iterator.md) | The language has no generators, or traversal needs reset and peek |
-| Pattern matching, sum types, sealed classes | [Visitor](visitor.md), some [State](state.md) | The node set is open to third-party extension |
+| Pattern matching, sum types, sealed classes | [Visitor](visitor.md), some [State](state.md) | The language has no sum types or exhaustive matching |
 | Modules, module-level instances | [Singleton](singleton.md), [Facade](facade.md) | You need lazy init with thread safety and no DI is available |
 | Language decorators, higher-order functions, middleware | [Decorator](decorator.md), [Proxy](proxy.md) | You stack wrappers per object at runtime |
 | Named arguments with defaults, dataclasses, records | [Builder](builder.md) | Assembly is step-wise or validates across fields |

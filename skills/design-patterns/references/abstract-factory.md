@@ -22,7 +22,7 @@ Create groups of related objects that must work together, without the client nam
 - There is only one product kind. Use a Factory Method or a factory function.
 - There is only one variant in production and one fake in tests. Inject the objects directly from the composition root.
 - Products do not need to match each other. Inject each dependency on its own.
-- New product kinds appear often. Each new kind changes the factory interface and every concrete factory. Use a registry map (`Record<Kind, () => Product>`) instead.
+- New product kinds appear often. Each new kind changes the factory interface and every concrete factory. Use a registry map (`Record<Kind, () => Product>`) instead. Use this only if the products do not need to match. If they must match, accept the interface change.
 - The DI container already binds a whole module per environment. Use container modules, not a hand-written factory class.
 
 ## Shape
@@ -59,7 +59,7 @@ classDiagram
 6. Replace each `new ConcreteProduct()` and each environment `switch` with a call to the factory. Do one call site per commit.
 7. Delete the scattered environment checks.
 
-**Stop point:** after step 4 with only the test variant done. A `FakeInfraFactory` in tests already removes duplicated setup and proves the interface.
+**Stop point:** after steps 5 and 6 for one client class, with only the fake variant done. A `FakeInfraFactory` in tests already removes duplicated setup and proves the interface.
 
 ## Adaptations
 

@@ -67,8 +67,9 @@ Path AWAY from an existing Singleton. Each step keeps tests green.
 4. Pick one leaf caller. Add a constructor parameter typed with the interface, with a default of `Singleton.getInstance()`. This is a safe transitional seam.
 5. Update the tests of that caller to pass a fake. Remove the reset hacks for that caller.
 6. Repeat steps 4 and 5 caller by caller, from leaves toward the entry point.
-7. Create the instance once in the composition root and pass it down. Remove the default parameter values.
-8. Delete `getInstance()` and the static field. Add a lint rule that bans new static instance accessors.
+7. In the composition root, pass `Singleton.getInstance()` (not `new`) to every consumer. Remove the default parameter values.
+8. When a grep finds no other `getInstance(` reference, replace it in the root with `new X(...)`. Then delete `getInstance()` and the static field.
+9. Add a lint rule that bans new static instance accessors.
 
 **Stop point:** after step 5 for the most-tested modules. The global still exists, but the code under active change is now testable. The default-parameter seam is safe to leave in place.
 

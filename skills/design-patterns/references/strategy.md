@@ -23,7 +23,7 @@ Put each variant of one algorithm behind a shared contract, so the caller picks 
 - There are two variants and no third one is planned. Keep the `if`. It is easier to read than an interface.
 - The variants differ only in numbers, labels or thresholds. Use a lookup table or config object (`const RATES = { basic: 0.02, pro: 0.01 }`).
 - The language has first-class functions and the variant has no state. Pass a function or keep a map of functions. Do not create one class per variant.
-- The selection happens once at startup and never changes. A config value plus a factory function is enough.
+- The selection happens once at startup and never changes. Pick the function once in the composition root and inject it. Do not add a setter or a runtime swap mechanism.
 - The variants need very different inputs. A forced common signature hides the differences and leaks optional parameters. Keep separate functions.
 - The caller cannot know which variant to pick. The pattern moves the choice to the client, so it must have that knowledge.
 
@@ -96,7 +96,7 @@ classDiagram
 ## Neighbors
 
 - **State**: state objects know about each other and trigger transitions, strategies do not. Ask: does the object switch the variant by itself as events happen?
-- **Template Method**: varies steps through subclassing, fixed at compile time. Ask: do you need to change the behavior without a new subclass?
+- **Template Method**: shared code owns a fixed sequence and the variant fills only some steps. Ask: does the variant replace the whole algorithm, or only fill gaps in a skeleton you keep?
 - **Command**: wraps a request so it can be queued, logged or undone. Ask: is the object an action to run later, or a way to compute something now?
 - **Decorator**: adds behavior around an object. Strategy replaces the inner logic. Ask: do you wrap the result, or replace how it is produced?
 - **Bridge**: splits two dimensions that vary on their own. Ask: are there two independent axes of variation?
@@ -130,9 +130,13 @@ class RetryingClient {
   }
 }
 
-// The client picks the policy from config. RetryingClient never checks a mode string.
-const client = new RetryingClient(
-  (body) => fetch("/api/events", { method: "POST", body }),
-  backoffs[process.env.RETRY_POLICY as keyof typeof backoffs] ?? backoffs.fixed,
-);
+const isPolicy = (k: string): k is keyof typeof backoffs => Object.hasOwn(backoffs, k);
+
+// The composition root picks the policy once. RetryingClient never checks a mode string.
+export function makeClient(policyName: string) {
+  return new RetryingClient(
+    (body) => fetch("/api/events", { method: "POST", body }),
+    isPolicy(policyName) ? backoffs[policyName] : backoffs.fixed,
+  );
+}
 ```

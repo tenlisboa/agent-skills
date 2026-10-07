@@ -20,7 +20,7 @@ Give callers a uniform way to walk through the elements of a structure, one at a
 ## Do not use when
 
 - The data is an array, list, map or set and a normal loop works. The language already gives you an iterator. Use `for...of`, `forEach`, comprehensions or `range`.
-- Do not write a class with `hasNext()` and `next()` in a language with generators. Write a generator function (`function*`, `yield`, `iter.Seq`).
+- Do not write a class with `hasNext()` and `next()` in a language with generators. Write a generator (`function*`, `yield`) or, in Go, a range-over-func `iter.Seq`.
 - The caller needs random access or the length up front. Return an array or a read-only view.
 - The dataset is small and bounded. Materialize it into an array and keep the code simple.
 - You need set operations or joins across sources. Use the database or a query library, not hand-made iterators.
@@ -124,8 +124,8 @@ class OrgChart {
 
   *breadthFirst(): Generator<string> {
     const queue = [this.root]
-    while (queue.length > 0) {
-      const person = queue.shift()!
+    for (let i = 0; i < queue.length; i++) {
+      const person = queue[i] // index pointer: shift() is O(n) per call
       yield person
       queue.push(...(this.reports.get(person) ?? []))
     }
