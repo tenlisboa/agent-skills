@@ -59,8 +59,8 @@ classDiagram
 1. Measure. Record heap size and object count for a realistic input. Set a target number.
 2. Split the class fields into two lists: intrinsic (repeated, never changes per object) and extrinsic (unique or changing).
 3. Make the intrinsic fields read-only. Set them only in the constructor. Freeze the object if the language allows it.
-4. Extract Class: move the intrinsic fields and the methods that use mostly them into a new flyweight class.
-5. Replace each extrinsic field use inside those methods with a method parameter (Add Parameter).
+4. Extract Class: move the intrinsic fields and the methods that use only them into a new flyweight class.
+5. Move the methods that also read extrinsic fields, and pass those fields as parameters (Move Method plus Add Parameter).
 6. Create the factory with a map keyed by a stable serialization of the intrinsic state.
 7. Change the creation sites to call the factory. Keep the extrinsic fields in the original class, which becomes the context.
 8. Measure again with the same input. Keep the change only if it meets the target.

@@ -56,12 +56,12 @@ classDiagram
 
 ## Refactoring path
 
-1. Find the repeated cross-cutting code. Confirm it does not depend on private state of the core object.
+1. Find the repeated cross-cutting code. Confirm it does not depend on private state of the core object, and that no internal self-call passes through the concern.
 2. Extract Interface for the core object if it has none. Clients now depend on the interface.
 3. Change construction to go through one factory or the composition root. Clients stop calling `new` on the core class.
 4. Create one decorator class that implements the interface and delegates every method to an inner instance.
 5. Wrap the core object in the pass-through decorator in the factory. Run the tests.
-6. In one commit, move one concern from the core class into the decorator (Move Method). If a flag controlled the concern, wrap only when the old flag was on. Run the tests.
+6. In one commit, move one concern from the core class into the decorator (Move Method). If a flag controlled the concern and the flag is fixed at construction, wrap only when the flag was on. If the flag can change later, keep the flag check inside the decorator. Run the tests.
 7. Repeat for each concern. Remove the related flags and `if` blocks from the core class.
 8. Write a test that pins the wrapper order, for example "retry outside timing" or "timing outside retry".
 

@@ -118,11 +118,17 @@ class Topic<E> {
     return () => this.listeners.delete(fn); // caller must keep this to unsubscribe
   }
 
-  async emit(event: E): Promise<void> {
+  // Default keeps the old policy: a failing listener fails the caller.
+  // All listeners still run. Pass isolate=true only after the user agrees (step 6).
+  async emit(event: E, isolate = false): Promise<void> {
+    const errors: unknown[] = [];
     for (const fn of [...this.listeners]) {
       try { await fn(event); }
-      catch (err) { console.error("listener failed", err); } // a new policy: ask the user first (step 6)
+      catch (err) { errors.push(err); }
     }
+    if (errors.length === 0) return;
+    if (!isolate) throw new AggregateError(errors, "listener failed");
+    for (const err of errors) console.error("listener failed", err);
   }
 }
 

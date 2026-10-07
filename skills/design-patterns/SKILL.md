@@ -1,6 +1,6 @@
 ---
 name: design-patterns
-description: Refactors code and restructures architectures with the 22 Gang of Four design patterns, and shows the user a map of options before any edit. Use when code shows god classes, long switch or if/else chains on a type, duplicated variants, tight coupling to a vendor SDK, hidden globals, over-engineered abstractions, or legacy modules that resist change. Also use when the user asks which pattern fits, whether a pattern is overkill, or how to apply a pattern such as Strategy, Factory Method, Adapter, Observer, State or Decorator.
+description: Refactors code and restructures architectures with 22 of the 23 Gang of Four design patterns, and shows the user a map of options before any edit. Use when code shows god classes, long switch or if/else chains on a type, duplicated variants, tight coupling to a vendor SDK, hidden globals, over-engineered abstractions, or legacy modules that resist change. Also use when the user asks which pattern fits, whether a pattern is overkill, or how to apply a pattern such as Strategy, Factory Method, Adapter, Observer, State or Decorator.
 license: MIT
 metadata:
   author: tenlisboa
@@ -13,7 +13,7 @@ A pattern is an option, not a goal. Find the places where change hurts. For each
 
 The catalog follows the 22 patterns of [Refactoring Guru](https://refactoring.guru/design-patterns). Each pattern has one reference file. The files add signals in code, counter-signals, a refactoring path, adaptations per language and the form of the pattern at architecture scale.
 
-**An informed choice of the user wins.** A choice is informed when the user saw the options and their costs. A pattern named in the first request is not an informed choice yet. Show the options first. After the user confirms, the choice wins over your recommendation, over a "Do not use when" section and over a "stop point".
+**An informed choice of the user wins.** A choice is informed when the user saw the options and their costs. When a counter-signal matches, a pattern named in the first request is not an informed choice yet. Show the options first. After the user confirms, the choice wins over your recommendation, over a "Do not use when" section and over a "stop point".
 
 ## Choose the mode
 
@@ -23,14 +23,14 @@ Select the mode from the request before you read any code.
 |---|---|---|
 | Asks what a pattern is, compares patterns, or asks which pattern fits | **Answer** | Read the file of each pattern in the question. Answer, and name the lighter form from the "Adaptations" section. No map. |
 | Names one location and one pattern ("make this a Strategy") | **Targeted** | Read the pattern file. Then follow the Targeted steps below. |
-| Names one location but no pattern ("clean up this function") | **Targeted** | Find the signal in [smells-to-patterns.md](references/smells-to-patterns.md). Present a Refactor Map with one row and end the turn. If the smell routes to no pattern, offer the classic refactoring as option B. |
+| Names one location but no pattern ("clean up this function") | **Targeted** | Find the signal in [smells-to-patterns.md](references/smells-to-patterns.md). Present a Refactor Map with one row and end the turn. If the smell routes to no pattern, write option A as "none" and offer the classic refactoring as option B. Handle the reply as in "When the reply comes" and Phase 5. |
 | Asks to refactor a module, a codebase or an architecture | **Map** | Follow the five phases below. |
 
 ### Targeted steps
 
 1. Compare the code with the "Do not use when" section of the pattern file.
 2. If a counter-signal matches, stop before you edit. Do this also when the request names the pattern and its form ("one class per type"). Name the counter-signal, show the lighter form in a short sketch (10 lines maximum), and ask which one the user wants.
-3. If no counter-signal matches, or the user confirms the pattern, follow the "Refactoring path" of the file. Use Phase 5 below for tests and commits.
+3. If no counter-signal matches, state the lighter form in one line and follow the "Refactoring path" of the file. If the user confirms the pattern after step 2, do the same. Use Phase 5 below for tests and commits.
 
 ## Map mode
 
@@ -131,7 +131,7 @@ Follow [refactoring-playbook.md](references/refactoring-playbook.md). For each c
 4. Make one or more commits for each row. Do not mix two rows in one commit. Tests for a new seam go in the commit of their row.
 5. Keep the behavior. If you find a bug, pin it with a test, list it, and ask before you fix it.
 
-Commit only when the user or the instructions of the repository allow it. If commits are not allowed, stop after each row and show the diff summary and the test result.
+Commit only when the user or the instructions of the repository allow it. If commits are not allowed and a user is present, stop after each row and show the diff summary and the test result. If you run without a user, apply all rows and put the diff summary and the test result of each row in the final report.
 
 After all rows, report: what changed for each row, the line delta, the test result, and the next wave.
 
@@ -174,7 +174,7 @@ Cross-cutting references:
 
 | Mistake | Correct action |
 |---|---|
-| Edit code before the user saw the options | Produce the Refactor Map and end the turn. |
+| Edit code before the user saw the options (Map mode, or a counter-signal in Targeted mode) | Produce the Refactor Map and end the turn. |
 | One class for each variant in Python or TypeScript, with no other option shown | Offer a function or a dict of functions as option B. |
 | A pattern on data that only varies by value (rates, prices, labels) | Use a lookup table. List it under "Not touching". |
 | A hidden global (Singleton, module state) left out with no comment | State its test cost in the map. Offer explicit injection as an option. |

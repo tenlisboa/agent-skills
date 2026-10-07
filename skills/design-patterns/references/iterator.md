@@ -60,7 +60,7 @@ classDiagram
 4. Replace the copied loops in callers with `for...of` over the generator. Tests must show the same order.
 5. Stop point: a generator per traversal already hides the structure. Most codebases stop here.
 6. Make the container itself iterable (`[Symbol.iterator]`, `__iter__`) only when one order is the obvious default.
-7. Encapsulate Collection. First give the container add and remove methods, and move the callers that mutate the array to them. Then replace the getters that return the internal array with the iterator or a read-only copy.
+7. Encapsulate Collection. First give the container methods for each mutation that callers do (push, splice, sort, index assignment), and move those callers to them. Then replace the getters that return the internal array with the iterator or a read-only copy.
 8. For remote or paged data, use an async generator. Fetch the next page only when the consumer asks for more.
 
 ## Adaptations

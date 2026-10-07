@@ -22,7 +22,7 @@ npx skills add tenlisboa/agent-skills --skill design-patterns
 
 ### design-patterns
 
-Refactors code and restructures architectures with the 22 Gang of Four design patterns, without dogma. The agent finds the places where change hurts and builds a **Refactor Map**. For each place, the map offers a full pattern, a lighter adaptation and a do-nothing option, with the cost of each one. The user chooses, and the agent applies the choices in small steps that keep the tests green.
+Refactors code and restructures architectures with 22 of the 23 Gang of Four design patterns, without dogma. The agent finds the places where change hurts and builds a **Refactor Map**. For each place, the map offers a full pattern, a lighter adaptation and a do-nothing option, with the cost of each one. The user chooses, and the agent applies the choices in small steps that keep the tests green.
 
 **Use when:**
 
