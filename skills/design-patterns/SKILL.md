@@ -13,7 +13,7 @@ A pattern is an option, not a goal. Find the places where change hurts. For each
 
 The catalog follows the 22 patterns of [Refactoring Guru](https://refactoring.guru/design-patterns). Each pattern has one reference file. The files add signals in code, counter-signals, a refactoring path, adaptations per language and the form of the pattern at architecture scale.
 
-**The explicit choice of the user wins.** It wins over your recommendation, over a "Do not use when" section and over a "stop point". State the cost one time, then do what the user chose.
+**An informed choice of the user wins.** A choice is informed when the user saw the options and their costs. A pattern named in the first request is not an informed choice yet. Show the options first. After the user confirms, the choice wins over your recommendation, over a "Do not use when" section and over a "stop point".
 
 ## Choose the mode
 
@@ -29,7 +29,7 @@ Select the mode from the request before you read any code.
 ### Targeted steps
 
 1. Compare the code with the "Do not use when" section of the pattern file.
-2. If a counter-signal matches, stop before you edit. Name the counter-signal, show the lighter form in a short sketch (10 lines maximum), and ask which one the user wants.
+2. If a counter-signal matches, stop before you edit. Do this also when the request names the pattern and its form ("one class per type"). Name the counter-signal, show the lighter form in a short sketch (10 lines maximum), and ask which one the user wants.
 3. If no counter-signal matches, or the user confirms the pattern, follow the "Refactoring path" of the file. Use Phase 5 below for tests and commits.
 
 ## Map mode
