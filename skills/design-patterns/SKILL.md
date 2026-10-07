@@ -1,85 +1,152 @@
 ---
 name: design-patterns
-description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
+description: Use when refactoring or restructuring code or architecture with design patterns, or when code shows god classes, long switch or if/else chains on a type, duplicated variants, tight coupling to a vendor SDK, hidden globals, or legacy modules that resist change. Also use when the user asks which pattern fits, whether a pattern is overkill, or how to apply a Gang of Four pattern such as Strategy, Factory, Adapter, Observer, State or Decorator.
+license: MIT
+metadata:
+  author: tenlisboa
+  version: "1.0.0"
 ---
 
-# Design Patterns
+# Design Patterns for Refactoring
 
-## Overview
+A pattern is an option, not a goal. Find the places where change hurts, offer the user a full pattern, a lighter adaptation and a do-nothing option for each place, and let the user choose. Then apply the choices in small steps that keep the tests green.
 
-[TODO: 1-2 sentences explaining what this skill enables]
+The catalog follows the 22 patterns of [Refactoring Guru](https://refactoring.guru/design-patterns). Each pattern has one reference file. The files add signals in code, counter-signals, a refactoring path, adaptations per language and the form of the pattern at architecture scale.
 
-## Structuring This Skill
+## Choose the mode
 
-[TODO: Choose the structure that best fits this skill's purpose. Common patterns:
+Select the mode from the request before you read any code.
 
-**1. Workflow-Based** (best for sequential processes)
-- Works well when there are clear step-by-step procedures
-- Example: DOCX skill with "Workflow Decision Tree" → "Reading" → "Creating" → "Editing"
-- Structure: ## Overview → ## Workflow Decision Tree → ## Step 1 → ## Step 2...
+| The request | Mode | What to do |
+|---|---|---|
+| Asks what a pattern is, or which pattern fits a snippet | **Answer** | Read the pattern file. Answer, and name the lighter adaptation from its "Adaptations" section. No map. |
+| Names one location and one pattern ("make this a Strategy") | **Targeted** | Read the pattern file. If its "Do not use when" section matches the code, say so in one line and ask. Else follow its "Refactoring path". |
+| Asks to refactor a module, a codebase or an architecture | **Map** | Follow the five phases below. |
 
-**2. Task-Based** (best for tool collections)
-- Works well when the skill offers different operations/capabilities
-- Example: PDF skill with "Quick Start" → "Merge PDFs" → "Split PDFs" → "Extract Text"
-- Structure: ## Overview → ## Quick Start → ## Task Category 1 → ## Task Category 2...
+## Map mode
 
-**3. Reference/Guidelines** (best for standards or specifications)
-- Works well for brand guidelines, coding standards, or requirements
-- Example: Brand styling with "Brand Guidelines" → "Colors" → "Typography" → "Features"
-- Structure: ## Overview → ## Guidelines → ## Specifications → ## Usage...
+### Phase 1: Get the change pressure
 
-**4. Capabilities-Based** (best for integrated systems)
-- Works well when the skill provides multiple interrelated features
-- Example: Product Management with "Core Capabilities" → numbered capability list
-- Structure: ## Overview → ## Core Capabilities → ### 1. Feature → ### 2. Feature...
+The right pattern depends on what will change next. Patterns pay off only where variation is real.
 
-Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
+- If the request says what will change ("more payment methods next quarter"), use that and go to Phase 2.
+- If the request does not say it, ask one question before the inventory: "What do you expect to add or change in this code in the next months?" Give two or three concrete guesses from the file names.
+- If the user is not available, write your assumption at the top of the map and mark it "to confirm".
 
-Delete this entire "Structuring This Skill" section when done - it's just guidance.]
+### Phase 2: Inventory (read only)
 
-## [TODO: Replace with the first main section based on chosen structure]
+Do not edit files in this phase.
 
-[TODO: Add content here. See examples in existing skills:
-- Code samples for technical skills
-- Decision trees for complex workflows
-- Concrete examples with realistic user requests
-- References to scripts/templates/references as needed]
+1. Set the scope. If the scope has more than about 2,000 lines or 20 files, find hotspots first. Run the churn and complexity commands in [refactoring-playbook.md](references/refactoring-playbook.md) (Step 1).
+2. Keep a maximum of 7 hotspots for this map. Put the others in a "Later waves" list.
+3. For each hotspot, write the observed signal with `path:line`. Route it with [smells-to-patterns.md](references/smells-to-patterns.md).
+4. Note the safety net: which tests exist, and which characterization tests are necessary before a change.
 
-## Resources
+### Phase 3: Decide each hotspot
 
-This skill includes example resource directories that demonstrate how to organize different types of bundled resources:
+Climb the decision ladder from [criticism-and-adaptations.md](references/criticism-and-adaptations.md). Stop at the first step that removes the pain.
 
-### scripts/
-Executable code (Python/Bash/etc.) that can be run directly to perform specific operations.
+1. **Nothing:** leave the code as it is.
+2. **Classic refactoring:** Extract Method, Move Method, Introduce Parameter Object, a lookup table.
+3. **Language idiom:** a function, a dict of functions, a closure, a generator, a discriminated union, a module.
+4. **Lighter adaptation:** the intent of the pattern with fewer roles.
+5. **Full pattern:** all the roles.
 
-**Examples from other skills:**
-- PDF skill: `fill_fillable_fields.py`, `extract_form_field_info.py` - utilities for PDF manipulation
-- DOCX skill: `document.py`, `utilities.py` - Python modules for document processing
+In the map, rung 1 is option C, the best of rungs 2 to 4 is option B, and rung 5 is option A. Before you recommend rung 3, 4 or 5, read the pattern file. Check its "Do not use when" section against the code. Check its "Adaptations" section for the language of the project. In Python, JavaScript, TypeScript, Go, Ruby and Kotlin, a function or a map of functions is usually the default for Strategy, Command and Template Method.
 
-**Appropriate for:** Python scripts, shell scripts, or any executable code that performs automation, data processing, or specific operations.
+### Phase 4: Present the Refactor Map, then stop
 
-**Note:** Scripts may be executed without loading into context, but can still be read by Claude for patching or environment adjustments.
+The Refactor Map is the required output of Map mode. Produce it before any edit. Fill every slot.
 
-### references/
-Documentation and reference material intended to be loaded into context to inform Claude's process and thinking.
+````markdown
+## Refactor Map: <scope>
 
-**Examples from other skills:**
-- Product management: `communication.md`, `context_building.md` - detailed workflow guides
-- BigQuery: API reference documentation and query examples
-- Finance: Schema documentation, company policies
+**Change pressure:** <what the user said, or your assumption marked "to confirm">
+**Safety net:** <tests that exist> / <characterization tests to add first>
 
-**Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Claude should reference while working.
+### 1. <hotspot name> (`path/to/file:line`)
+- **Signal:** <what you saw in the code>
+- **Options:**
+  - **A. Full pattern:** <Pattern> applied here as <short description>. Cost: <new files, approximate line delta, extra indirection>.
+  - **B. Lighter:** <adaptation>. Cost: <...>.
+  - **C. Leave it:** <the condition under which the current code is fine>.
+- **Recommendation:** <A, B or C>, because <reason tied to the change pressure>.
+- **Question:** <one question that only the user can answer, or "none">
 
-### assets/
-Files not intended to be loaded into context, but rather used within the output Claude produces.
+### 2. ...
 
-**Examples from other skills:**
-- Brand styling: PowerPoint template files (.pptx), logo files
-- Frontend builder: HTML/React boilerplate project directories
-- Typography: Font files (.ttf, .woff2)
+### Not touching
+- `<path>`: <signal> needs no pattern, because <reason>.
 
-**Appropriate for:** Templates, boilerplate code, document templates, images, icons, fonts, or any files meant to be copied or used in the final output.
+### Later waves
+- <hotspots outside this map, if any>
 
----
+**Reply with a choice for each row (for example "1A, 2B, 3C") or "apply the recommendations".**
+````
 
-**Any unneeded directories can be deleted.** Not every skill requires all three types of resources.
+After the map, end your turn. Wait for the choice of the user.
+
+If the user said to work without questions, write the map to `REFACTOR_MAP.md`. Apply only the recommended options. List the open questions at the end of your report.
+
+At architecture scale, a row is a seam between modules or services, not a function. Take the options from the "At architecture scale" section of each pattern file. Examples: an anti-corruption layer (Adapter), domain events with an outbox (Observer), a module facade for a strangler migration (Facade).
+
+### Phase 5: Apply the chosen rows
+
+Follow [refactoring-playbook.md](references/refactoring-playbook.md). For each chosen row:
+
+1. Add the characterization tests first if the safety net needs them. Commit them alone.
+2. Follow the "Refactoring path" of the pattern file. Run the tests after each step.
+3. Stop at the "stop point" of the path if it already removes the pain. Tell the user.
+4. Make one commit for each row. Do not mix two patterns in one commit.
+5. Keep the behavior. If you find a bug, pin it with a test, list it, and ask before you fix it.
+
+After all rows, report: what changed for each row, the line delta, the test result, and the next wave.
+
+## Pattern index
+
+Read only the files that the inventory points to.
+
+| Pattern | Pick it when | File |
+|---|---|---|
+| Factory Method | Callers use `new` on a concrete type that varies by context | [factory-method.md](references/factory-method.md) |
+| Abstract Factory | Families of related objects must match each other (per vendor, per platform) | [abstract-factory.md](references/abstract-factory.md) |
+| Builder | Construction has many optional parts or steps, and named arguments do not fix it | [builder.md](references/builder.md) |
+| Prototype | Copies of configured objects are cheaper than building them again | [prototype.md](references/prototype.md) |
+| Singleton | Usually never. Read it to remove one, or to replace it with injection | [singleton.md](references/singleton.md) |
+| Adapter | A third-party or legacy interface does not fit your code | [adapter.md](references/adapter.md) |
+| Bridge | Two dimensions vary on their own and subclasses multiply (N x M) | [bridge.md](references/bridge.md) |
+| Composite | Clients treat a tree of items and a single item the same way | [composite.md](references/composite.md) |
+| Decorator | Cross-cutting behavior (retry, cache, logging) wraps a call in combinations | [decorator.md](references/decorator.md) |
+| Facade | Callers repeat the same sequence of calls into a complex subsystem | [facade.md](references/facade.md) |
+| Flyweight | Memory grows with many objects that share most of their state | [flyweight.md](references/flyweight.md) |
+| Proxy | Access to an object needs lazy loading, caching, access control or a remote hop | [proxy.md](references/proxy.md) |
+| Chain of Responsibility | A request passes through an ordered list of handlers that can stop it | [chain-of-responsibility.md](references/chain-of-responsibility.md) |
+| Command | Actions must be queued, logged, retried or undone | [command.md](references/command.md) |
+| Iterator | Traversal of a custom collection leaks its internal structure | [iterator.md](references/iterator.md) |
+| Mediator | Many components call each other directly after events | [mediator.md](references/mediator.md) |
+| Memento | State must be saved and restored without exposing internals | [memento.md](references/memento.md) |
+| Observer | One change must notify a list of dependents that grows | [observer.md](references/observer.md) |
+| State | Behavior depends on a status, and transitions are spread in `if` chains | [state.md](references/state.md) |
+| Strategy | A `switch` selects one variant of an algorithm, and variants grow | [strategy.md](references/strategy.md) |
+| Template Method | Variants share a fixed sequence of steps and differ in some steps | [template-method.md](references/template-method.md) |
+| Visitor | Many operations run over a stable set of node types | [visitor.md](references/visitor.md) |
+
+Cross-cutting references:
+
+- [smells-to-patterns.md](references/smells-to-patterns.md): 23 code smells with the first refactoring, the pattern candidates and the question that decides. It also has a "change pressure to pattern" table.
+- [criticism-and-adaptations.md](references/criticism-and-adaptations.md): when patterns hurt, language features that replace patterns, the YAGNI test and the decision ladder.
+- [refactoring-playbook.md](references/refactoring-playbook.md): hotspots, characterization tests, seams, branch by abstraction, strangler fig, parallel change and metrics.
+
+## Common mistakes
+
+| Mistake | Correct action |
+|---|---|
+| Edit code before the user saw the options | Produce the Refactor Map and end the turn. |
+| One class for each variant in Python or TypeScript, with no other option shown | Offer a function or a dict of functions as option B. |
+| A pattern on data that only varies by value (rates, prices, labels) | Use a lookup table. List it under "Not touching". |
+| A hidden global (Singleton, module state) left out with no comment | State its test cost in the map. Offer explicit injection as an option. |
+| A large line increase done before the user weighed it | Put the approximate line delta in the "Cost" slot of each option. |
+| A pattern name chosen first, then a place to use it | Start from the signal and the change pressure. Patterns come last. |
+| A map with 20 rows for a large codebase | Keep 7 hotspots at most. Put the rest in "Later waves". |
+| Bugs fixed during the refactor | Pin the bug with a test, list it and ask. A refactor keeps behavior. |
+| A full rewrite of a module in one commit | Use one commit per row and branch by abstraction for big moves. |
