@@ -61,6 +61,7 @@ The Refactor Map is the required output of Map mode. Produce it before any edit.
 ````markdown
 ## Refactor Map: <scope>
 
+**Diagnosis:** <one or two sentences: why change is hard here today>
 **Change pressure:** <what the user said, or your assumption marked "to confirm">
 **Safety net:** <tests that exist> / <characterization tests to add first>
 
@@ -78,8 +79,13 @@ The Refactor Map is the required output of Map mode. Produce it before any edit.
 ### Not touching
 - `<path>`: <signal> needs no pattern, because <reason>.
 
+### Bugs found
+- `<path:line>`: <behavior>. I will pin it with a test and not fix it, unless you say so. (Write "none" if none.)
+
 ### Later waves
 - <hotspots outside this map, if any>
+
+**Order:** <the sequence of rows and the reason, for example the row that removes a live risk first>
 
 **Reply with a choice for each row (for example "1A, 2B, 3C") or "apply the recommendations".**
 ````
