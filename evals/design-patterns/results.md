@@ -28,9 +28,9 @@ Model for all runs: Claude Opus 5.5 as a general-purpose subagent. All runs had 
 - Template: added the slots "Diagnosis", "Bugs found" and "Order". Both agents added these sections on their own.
 - Open point: Phase 1 costs one round trip with no content when the inventory is cheap. Kept, because the answer changed three rows of the S2 map.
 
-## Round 1, extra scenarios (skill v1.0.0 with the round 1 reference fixes, 2026-10-07)
+## Round 1, extra scenarios (skill at `7289fe6`, before the round 1 reference fixes, 2026-10-07)
 
-Same model and the same confound as round 1. These runs tested the modes that S1 and S2 do not reach.
+Same model and the same confound as round 1. These runs tested the modes that S1 and S2 do not reach. They ran at the same time as the fixer agents of the round 1 review.
 
 | Scenario | Result | Evidence |
 |---|---|---|
@@ -41,13 +41,13 @@ Same model and the same confound as round 1. These runs tested the modes that S1
 
 Gaps from the self-reports, applied before round 2: a slot for constraints that apply to the whole map, line deltas marked as estimates, a row for a component that does not exist yet, "Not touching" for hotspots off the path, the lighter option as a sketch in Targeted mode, and reading all compared pattern files in Answer mode.
 
-## Round 2 (skill v1.1.0, 2026-10-07)
+## Round 2 (skill v1.1.0 at `ccd5085`, 2026-10-07)
 
 Goal: find regressions after the round 1 fixes.
 
 | Scenario | Result | Evidence |
 |---|---|---|
-| S1: refactor fixture-shop | Pass on the map criteria | Four rows with A, B and C, a recommended order, 4 bugs to pin, and a stop before any edit. The execution step was not run again. |
+| S1: refactor fixture-shop | Pass on the map criteria | Four rows with A, B and C, a recommended order, 4 bugs to pin, and a stop before any edit. The run ended at the map. |
 | S3: Targeted, named pattern with a counter-signal | Fail (regression) | The agent built the classes and named the cost only after the change. |
 
 Cause of the S3 regression: the new rule "the explicit choice of the user wins" let the agent read the first request as the choice. Then it skipped the counter-signal check. Fix in `24977bb`: only a choice that the user makes after the user sees the options counts.
@@ -63,7 +63,7 @@ After the fix:
 
 An independent reviewer read the whole repository. It found 3 blocking items, for example grep hints that got a second path from a script. The fixes are in `b73b38b`, together with `scripts/check.py` and the CI workflow.
 
-## Round 3 (skill v1.1.0 with the round 2 fixes, 2026-10-07)
+## Round 3 (skill at `b73b38b`, 2026-10-07)
 
 | Scenario | Result | Evidence |
 |---|---|---|
@@ -86,3 +86,4 @@ Open gap: SKILL.md does not define the shape of the final report in a run withou
 
 - All runs used Claude Opus 5.5 with the global CLAUDE.md of the author. No run used Codex, Cursor or another agent. This is future work.
 - Each scenario ran one time per round, except S3 after the fix (three runs).
+- S3 to S7 have no baseline run without the skill.
